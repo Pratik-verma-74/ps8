@@ -94,15 +94,13 @@ def get_mission_stats():
 
 @app.get("/api/deliverables")
 def get_deliverables():
-    maps_available = MAPS_DIR is not None and os.path.exists(MAPS_DIR)
-    
     return [
         {
             "id": 1,
             "title": "Ice Detection Map",
             "subtitle": "Subsurface Radar & Dielectric Constant Analysis (DFSAR / Mini-RF)",
             "description": "High-probability ice stability regions predicted in permanently shadowed craters at South Pole.",
-            "url": "/static_maps/1_Ice_Detection_Map.png" if maps_available else "https://images.unsplash.com/photo-1614728894747-a83421e2b9c9?q=80&w=1000&auto=format&fit=crop",
+            "url": "/static/maps/1_Ice_Detection_Map.png",
             "tag": "Phase 3 Output"
         },
         {
@@ -110,7 +108,7 @@ def get_deliverables():
             "title": "Landing Site Map",
             "subtitle": "Multi-Criteria Decision Analysis (Slope + Hazard + Illumination)",
             "description": "Safe touchdown zones evaluated for optimal solar illumination (>200 hrs) and low boulder density.",
-            "url": "/static_maps/2_Landing_Site_Map.png" if maps_available else "https://images.unsplash.com/photo-1522030299830-16b8d3d049fe?q=80&w=1000&auto=format&fit=crop",
+            "url": "/static/maps/2_Landing_Site_Map.png",
             "tag": "Phase 4 Output"
         },
         {
@@ -118,7 +116,7 @@ def get_deliverables():
             "title": "Rover Route Map",
             "subtitle": "Autonomous Path Planning (A* / Dijkstra Algorithm)",
             "description": "Safest navigation trajectory avoiding steep craters and high hazard scores from touchdown point to ice deposits.",
-            "url": "/static_maps/3_Rover_Route_Map.png" if maps_available else "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1000&auto=format&fit=crop",
+            "url": "/static/maps/3_Rover_Route_Map.png",
             "tag": "Phase 5 Output"
         }
     ]
