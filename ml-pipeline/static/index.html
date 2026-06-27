@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ISRO Chandrayaan AI | Lunar South Pole Mission Control</title>
+    <meta name="description" content="Advanced AI-powered Lunar South Pole Ice Detection, Safe Landing Site Selection, and Autonomous Rover Route Planning GUI.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Top Navigation Header -->
+        <header class="navbar glass-panel">
+            <div class="logo-section">
+                <div class="logo-icon">
+                    <i data-lucide="rocket" class="icon-pulse"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>ISRO LUNAR MISSION AI</h1>
+                    <span>SOUTH POLE INTELLIGENCE & NAVIGATION</span>
+                </div>
+            </div>
+            <nav class="nav-tabs">
+                <button class="tab-btn active" onclick="switchTab('overview')">
+                    <i data-lucide="layout-dashboard"></i> Deliverables Overview
+                </button>
+                <button class="tab-btn" onclick="switchTab('explorer')">
+                    <i data-lucide="database"></i> Combined Dataset (6 Backbone)
+                </button>
+                <button class="tab-btn" onclick="switchTab('routing')">
+                    <i data-lucide="navigation"></i> Rover Route Planner (A*)
+                </button>
+            </nav>
+            <div class="status-badge">
+                <span class="status-indicator"></span>
+                <span id="telemetry-status">TELEMETRY ONLINE</span>
+            </div>
+        </header>
+
+        <!-- Stats Banner -->
+        <section class="stats-banner">
+            <div class="stat-card glass-panel">
+                <div class="stat-icon cyan"><i data-lucide="database"></i></div>
+                <div class="stat-info">
+                    <span class="stat-label">Total Data Points</span>
+                    <h3 id="stat-total">5,000+</h3>
+                    <p class="stat-sub">OHRC + LROC + DFSAR + Diviner</p>
+                </div>
+            </div>
+            <div class="stat-card glass-panel">
+                <div class="stat-icon emerald"><i data-lucide="snowflake"></i></div>
+                <div class="stat-info">
+                    <span class="stat-label">High Ice Zones (>50%)</span>
+                    <h3 id="stat-ice">Loading...</h3>
+                    <p class="stat-sub">Permanently Shadowed Craters</p>
+                </div>
+            </div>
+            <div class="stat-card glass-panel">
+                <div class="stat-icon blue"><i data-lucide="shield-check"></i></div>
+                <div class="stat-info">
+                    <span class="stat-label">Safe Landing Sites</span>
+                    <h3 id="stat-landing">Loading...</h3>
+                    <p class="stat-sub">Slope &lt; 12° | Low Hazard Score</p>
+                </div>
+            </div>
+            <div class="stat-card glass-panel">
+                <div class="stat-icon amber"><i data-lucide="thermometer-snowflake"></i></div>
+                <div class="stat-info">
+                    <span class="stat-label">Avg Surface Temp</span>
+                    <h3 id="stat-temp">Loading...</h3>
+                    <p class="stat-sub">Cryogenic Stability Validated</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 1: DELIVERABLES OVERVIEW -->
+        <main id="tab-overview" class="tab-content active">
+            <div class="section-header">
+                <h2>Final Deliverables: AI Intelligence Maps</h2>
+                <p>Interactive spatial mapping combining Lunar Surface Images, DEM, DFSAR Radar, Diviner Temp, and Illumination.</p>
+            </div>
+            <div class="deliverables-grid" id="deliverables-container">
+                <!-- Dynamically loaded from API -->
+                <div class="loading-spinner">Loading Deliverables...</div>
+            </div>
+        </main>
+
+        <!-- TAB 2: DATASET EXPLORER -->
+        <main id="tab-explorer" class="tab-content">
+            <div class="section-header">
+                <h2>6-Backbone Combined Dataset Explorer</h2>
+                <p>Filter and inspect the multi-modal fused dataset processed from raw satellite telemetry.</p>
+            </div>
+            
+            <div class="filter-panel glass-panel">
+                <div class="filter-group">
+                    <label>Min Ice Probability: <span id="val-ice">0.00</span></label>
+                    <input type="range" id="filter-ice" min="0" max="1" step="0.05" value="0" onchange="updateFilters()">
+                </div>
+                <div class="filter-group">
+                    <label>Max Hazard Score: <span id="val-haz">100</span></label>
+                    <input type="range" id="filter-haz" min="10" max="100" step="5" value="100" onchange="updateFilters()">
+                </div>
+                <div class="filter-group">
+                    <label>Max Slope (°): <span id="val-slope">90</span></label>
+                    <input type="range" id="filter-slope" min="5" max="90" step="5" value="90" onchange="updateFilters()">
+                </div>
+                <button class="btn-primary" onclick="fetchDataset(1)">
+                    <i data-lucide="filter"></i> Apply Filters
+                </button>
+            </div>
+
+            <div class="table-container glass-panel">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Latitude</th>
+                            <th>Longitude</th>
+                            <th>Elevation (m)</th>
+                            <th>Slope (°)</th>
+                            <th>Temp (K)</th>
+                            <th>Radar Backscatter</th>
+                            <th>Sunlight (Hrs)</th>
+                            <th>Hazard Score</th>
+                            <th>Ice Probability</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body">
+                        <tr><td colspan="9" class="text-center">Loading dataset rows...</td></tr>
+                    </tbody>
+                </table>
+                <div class="pagination">
+                    <button class="btn-secondary" id="btn-prev" onclick="changePage(-1)">Previous</button>
+                    <span id="page-indicator">Page 1</span>
+                    <button class="btn-secondary" id="btn-next" onclick="changePage(1)">Next</button>
+                </div>
+            </div>
+        </main>
+
+        <!-- TAB 3: ROVER ROUTING -->
+        <main id="tab-routing" class="tab-content">
+            <div class="section-header">
+                <h2>Autonomous Rover Path Planning Simulation</h2>
+                <p>Simulate optimal pathfinding between Safe Touchdown coordinates and High-Probability Subsurface Ice zones using A* / Dijkstra algorithm.</p>
+            </div>
+
+            <div class="routing-layout">
+                <div class="routing-controls glass-panel">
+                    <h3><i data-lucide="cpu"></i> Algorithm Configuration</h3>
+                    <div class="form-group">
+                        <label>Pathfinding Engine</label>
+                        <select class="custom-select" id="algo-select">
+                            <option value="astar">A* Heuristic Search (Optimal Terrain Weighting)</option>
+                            <option value="dijkstra">Dijkstra Uniform Cost (Absolute Safest)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Hazard Penalty Weight</label>
+                        <input type="range" min="1" max="10" value="7">
+                    </div>
+                    <div class="form-group">
+                        <label>Slope Avoidance Threshold</label>
+                        <input type="range" min="5" max="25" value="15">
+                    </div>
+                    <button class="btn-glow w-full" onclick="runRouteSimulation()">
+                        <i data-lucide="play"></i> Compute Safest Trajectory
+                    </button>
+
+                    <div class="route-summary" id="route-summary">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <div class="waypoints-panel glass-panel">
+                    <h3><i data-lucide="map-pin"></i> Computed Waypoint Sequence</h3>
+                    <div class="timeline" id="waypoints-list">
+                        <p class="text-muted">Click 'Compute Safest Trajectory' to generate route waypoints.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Modal for Fullscreen Map Viewing -->
+        <div id="map-modal" class="modal">
+            <div class="modal-content glass-panel">
+                <span class="close-btn" onclick="closeModal()">&times;</span>
+                <h3 id="modal-title">Map Title</h3>
+                <p id="modal-subtitle">Subtitle</p>
+                <div class="modal-img-wrapper">
+                    <img id="modal-img" src="" alt="Full Map View">
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>ISRO South Pole Hackathon Project AI Dashboard &bull; Powered by FastAPI & Vanilla HTML/CSS/JS</p>
+        </footer>
+    </div>
+    <script src="/static/script.js"></script>
+</body>
+</html>
