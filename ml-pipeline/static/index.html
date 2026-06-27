@@ -11,6 +11,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Leaflet GIS Map Library -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <!-- Custom CSS -->
     <link rel="stylesheet" href="/static/style.css">
 </head>
@@ -28,7 +31,10 @@
                 </div>
             </div>
             <nav class="nav-tabs">
-                <button class="tab-btn active" onclick="switchTab('overview')">
+                <button class="tab-btn active" onclick="switchTab('gismap')">
+                    <i data-lucide="globe"></i> Real Moon GIS Map (3 Layers)
+                </button>
+                <button class="tab-btn" onclick="switchTab('overview')">
                     <i data-lucide="layout-dashboard"></i> Deliverables Overview
                 </button>
                 <button class="tab-btn" onclick="switchTab('explorer')">
@@ -80,19 +86,83 @@
             </div>
         </section>
 
-        <!-- TAB 1: DELIVERABLES OVERVIEW -->
-        <main id="tab-overview" class="tab-content active">
+        <!-- TAB 1: REAL GIS MOON MAP (GOOGLE MAPS STYLE) -->
+        <main id="tab-gismap" class="tab-content active">
+            <div class="section-header">
+                <h2>Interactive Real Moon Surface Map (Google Maps Style)</h2>
+                <p>Pan and zoom across real NASA LROC Lunar South Pole topography. Toggle multi-modal AI prediction overlays below.</p>
+            </div>
+
+            <div class="gis-layout glass-panel">
+                <div class="gis-sidebar">
+                    <h3><i data-lucide="layers"></i> Map Layer Controls</h3>
+                    <p class="text-muted text-sm mb-3">Toggle telemetry overlays directly on the real lunar surface.</p>
+                    
+                    <div class="layer-item base-layer active" id="btn-layer-base" onclick="toggleLayer('base')">
+                        <div class="layer-icon"><i data-lucide="moon"></i></div>
+                        <div class="layer-text">
+                            <strong>Original Moon Basemap</strong>
+                            <span>NASA LROC / Elevation DEM Surface</span>
+                        </div>
+                        <span class="layer-status">ACTIVE</span>
+                    </div>
+
+                    <div class="layer-item active layer-ice" id="btn-layer-ice" onclick="toggleLayer('ice')">
+                        <div class="layer-icon"><i data-lucide="snowflake"></i></div>
+                        <div class="layer-text">
+                            <strong>Layer 1: Ice Detection</strong>
+                            <span>Subsurface Radar Probability (>50%)</span>
+                        </div>
+                        <input type="checkbox" checked id="chk-ice" onclick="event.stopPropagation(); toggleLayer('ice');">
+                    </div>
+
+                    <div class="layer-item active layer-landing" id="btn-layer-landing" onclick="toggleLayer('landing')">
+                        <div class="layer-icon"><i data-lucide="target"></i></div>
+                        <div class="layer-text">
+                            <strong>Layer 2: Safe Landing Sites</strong>
+                            <span>Touchdown Zones (Slope &lt; 12°)</span>
+                        </div>
+                        <input type="checkbox" checked id="chk-landing" onclick="event.stopPropagation(); toggleLayer('landing');">
+                    </div>
+
+                    <div class="layer-item active layer-route" id="btn-layer-route" onclick="toggleLayer('route')">
+                        <div class="layer-icon"><i data-lucide="navigation-2"></i></div>
+                        <div class="layer-text">
+                            <strong>Layer 3: Rover Trajectory</strong>
+                            <span>A* Safest Path to Ice Deposits</span>
+                        </div>
+                        <input type="checkbox" checked id="chk-route" onclick="event.stopPropagation(); toggleLayer('route');">
+                    </div>
+
+                    <div class="map-legend mt-auto">
+                        <h4>Map Legend</h4>
+                        <div class="legend-row"><span class="dot dot-ice"></span> High Ice Deposit (Radar)</div>
+                        <div class="legend-row"><span class="dot dot-landing"></span> Safe Landing Touchdown</div>
+                        <div class="legend-row"><span class="line line-route"></span> Planned Rover Path</div>
+                    </div>
+                </div>
+
+                <div class="map-wrapper">
+                    <div id="lunar-gis-map"></div>
+                    <div class="map-overlay-info">
+                        <span><i data-lucide="crosshair"></i> South Pole Exploration Zone (Lat -89.5°, Lon 140.0°)</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- TAB 2: DELIVERABLES OVERVIEW -->
+        <main id="tab-overview" class="tab-content">
             <div class="section-header">
                 <h2>Final Deliverables: AI Intelligence Maps</h2>
-                <p>Interactive spatial mapping combining Lunar Surface Images, DEM, DFSAR Radar, Diviner Temp, and Illumination.</p>
+                <p>Static high-resolution deliverables generated from QGIS and Python ML Pipeline.</p>
             </div>
             <div class="deliverables-grid" id="deliverables-container">
-                <!-- Dynamically loaded from API -->
                 <div class="loading-spinner">Loading Deliverables...</div>
             </div>
         </main>
 
-        <!-- TAB 2: DATASET EXPLORER -->
+        <!-- TAB 3: DATASET EXPLORER -->
         <main id="tab-explorer" class="tab-content">
             <div class="section-header">
                 <h2>6-Backbone Combined Dataset Explorer</h2>
@@ -144,7 +214,7 @@
             </div>
         </main>
 
-        <!-- TAB 3: ROVER ROUTING -->
+        <!-- TAB 4: ROVER ROUTING -->
         <main id="tab-routing" class="tab-content">
             <div class="section-header">
                 <h2>Autonomous Rover Path Planning Simulation</h2>
@@ -173,9 +243,7 @@
                         <i data-lucide="play"></i> Compute Safest Trajectory
                     </button>
 
-                    <div class="route-summary" id="route-summary">
-                        <!-- Populated by JS -->
-                    </div>
+                    <div class="route-summary" id="route-summary"></div>
                 </div>
 
                 <div class="waypoints-panel glass-panel">
@@ -200,7 +268,7 @@
         </div>
 
         <footer class="footer">
-            <p>ISRO South Pole Hackathon Project AI Dashboard &bull; Powered by FastAPI & Vanilla HTML/CSS/JS</p>
+            <p>ISRO South Pole Hackathon Project AI Dashboard &bull; Powered by FastAPI, Leaflet GIS & Vanilla HTML/CSS/JS</p>
         </footer>
     </div>
     <script src="/static/script.js"></script>
