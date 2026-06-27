@@ -33,13 +33,6 @@ function initGISMap() {
         attribution: 'NASA LROC / OpenPlanetary Moon Basemap'
     }).addTo(gisMap);
 
-    // Add Real Lunar Surface DEM Satellite Overlay (Generated directly from ISRO Telemetry Dataset)
-    const demBounds = [[-84.0, -180.0], [-70.0, 180.0]];
-    L.imageOverlay('/static/maps/real_lunar_surface_dem.png', demBounds, {
-        opacity: 0.85,
-        interactive: false
-    }).addTo(gisMap);
-
     // Layer Groups (Only Ice Detection active by default)
     iceLayerGroup = L.layerGroup().addTo(gisMap);
     landingLayerGroup = L.layerGroup();
