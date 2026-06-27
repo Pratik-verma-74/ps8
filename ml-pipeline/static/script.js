@@ -20,23 +20,23 @@ function initGISMap() {
     const container = document.getElementById("lunar-gis-map");
     if (!container || gisMap) return;
 
-    // Center on Lunar South Pole exploration sector (-88.95, 180.0)
+    // Center on Lunar South Pole exploration sector (-88.95, 0.0)
     gisMap = L.map("lunar-gis-map", {
-        attributionControl: false,
+        attributionControl: true,
         zoomControl: true
-    }).setView([-88.95, 180.0], 6);
+    }).setView([-88.95, 0.0], 5);
 
-    // Dark Space texture basemap
-    L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png', {
-        maxZoom: 12,
-        minZoom: 4,
-        subdomains: 'abcd'
+    // Real OpenPlanetary Interactive Moon Basemap (EPSG:3857 compatible)
+    L.tileLayer('https://cartocdn-gusc.global.ssl.fastly.net/opmbuilder/api/v1/map/named/opm-moon-basemap-v0-1/all/{z}/{x}/{y}.png', {
+        maxZoom: 16,
+        minZoom: 2,
+        attribution: 'NASA LROC / OpenPlanetary Moon Basemap'
     }).addTo(gisMap);
 
     // Add Real Lunar Surface DEM Satellite Overlay (Generated directly from ISRO Telemetry Dataset)
-    const demBounds = [[-89.9, 0.0], [-88.0, 360.0]];
+    const demBounds = [[-89.9, -180.0], [-88.0, 180.0]];
     L.imageOverlay('/static/maps/real_lunar_surface_dem.png', demBounds, {
-        opacity: 0.95,
+        opacity: 0.9,
         interactive: false
     }).addTo(gisMap);
 
@@ -54,10 +54,14 @@ async function populateGISLayers() {
         const data = await res.json();
         const rows = data.rows || [];
 
+        // Helper to convert 0..360 longitude to standard planetary Web Mercator -180..180
+        const toMercLon = (lon) => (lon > 180 ? lon - 360 : lon);
+
         // Layer 1: Ice Detection (Blue glowing circles over real coordinates)
         rows.forEach((r, idx) => {
             const lat = r.Latitude !== undefined ? r.Latitude : (-88.85 + Math.sin(idx)*0.4);
-            const lon = r.Longitude !== undefined ? r.Longitude : (180.0 + Math.cos(idx)*20.0);
+            const lonRaw = r.Longitude !== undefined ? r.Longitude : (180.0 + Math.cos(idx)*20.0);
+            const lon = toMercLon(lonRaw);
             const iceProb = r.Ice_Probability !== undefined ? r.Ice_Probability : 0.75;
             
             if (iceProb > 0.2 || idx % 3 === 0) {
@@ -74,7 +78,7 @@ async function populateGISLayers() {
                     <div style="text-align:left; font-family:'Outfit',sans-serif;">
                         <h4 style="color:#00f2fe; margin-bottom:6px;">❄️ Subsurface Ice Deposit</h4>
                         <p style="margin:3px 0;"><strong>Latitude:</strong> ${lat.toFixed(4)}°</p>
-                        <p style="margin:3px 0;"><strong>Longitude:</strong> ${lon.toFixed(4)}°</p>
+                        <p style="margin:3px 0;"><strong>Longitude:</strong> ${lonRaw.toFixed(4)}° (${lon.toFixed(4)}°)</p>
                         <p style="margin:3px 0;"><strong>Radar Probability:</strong> <span style="color:#00f2fe; font-weight:700;">${(iceProb*100).toFixed(1)}%</span></p>
                         <p style="margin:3px 0;"><strong>Surface Temp:</strong> ${r.Temperature || 154.2} K</p>
                     </div>
@@ -86,7 +90,8 @@ async function populateGISLayers() {
         // Layer 2: Safe Landing Sites (Green targets on real coordinates)
         rows.forEach((r, idx) => {
             const lat = r.Latitude !== undefined ? r.Latitude : (-88.85 + Math.cos(idx)*0.35);
-            const lon = r.Longitude !== undefined ? r.Longitude : (180.0 + Math.sin(idx)*18.0);
+            const lonRaw = r.Longitude !== undefined ? r.Longitude : (180.0 + Math.sin(idx)*18.0);
+            const lon = toMercLon(lonRaw);
             const slope = r.Slope !== undefined ? r.Slope : 6.4;
             const hazard = r.Hazard_Score !== undefined ? r.Hazard_Score : 15.0;
             
@@ -119,10 +124,10 @@ async function populateGISLayers() {
         const startR = safeRows[0] || rows[0] || {Latitude: -89.1, Longitude: 140.0};
         const endR = iceRows[0] || rows[rows.length-1] || {Latitude: -88.5, Longitude: 300.0};
         
-        const startPoint = [startR.Latitude, startR.Longitude];
-        const midPoint1 = [(startR.Latitude*2 + endR.Latitude)/3 + 0.05, (startR.Longitude*2 + endR.Longitude)/3 + 5];
-        const midPoint2 = [(startR.Latitude + endR.Latitude*2)/3 - 0.05, (startR.Longitude + endR.Longitude*2)/3 - 5];
-        const endPoint = [endR.Latitude, endR.Longitude];
+        const startPoint = [startR.Latitude, toMercLon(startR.Longitude)];
+        const midPoint1 = [(startR.Latitude*2 + endR.Latitude)/3 + 0.05, toMercLon((startR.Longitude*2 + endR.Longitude)/3 + 5)];
+        const midPoint2 = [(startR.Latitude + endR.Latitude*2)/3 - 0.05, toMercLon((startR.Longitude + endR.Longitude*2)/3 - 5)];
+        const endPoint = [endR.Latitude, toMercLon(endR.Longitude)];
 
         const routePolyline = L.polyline([startPoint, midPoint1, midPoint2, endPoint], {
             color: '#f59e0b',

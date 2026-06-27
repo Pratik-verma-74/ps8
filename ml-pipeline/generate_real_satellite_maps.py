@@ -27,8 +27,12 @@ df = pd.read_csv(csv_path)
 out_dir = os.path.join(os.path.dirname(__file__), "static", "maps")
 os.makedirs(out_dir, exist_ok=True)
 
+# Convert longitude > 180 to standard Web Mercator -180..180
+df['Longitude_Mercator'] = np.where(df['Longitude'] > 180, df['Longitude'] - 360, df['Longitude'])
+
 # Grid for interpolation
 grid_lon, grid_lat = np.mgrid[0:360:600j, -89.9:-88.0:400j]
+grid_lon_merc, grid_lat_merc = np.mgrid[-180:180:600j, -89.9:-88.0:400j]
 
 print("Interpolating Elevation DEM grid...")
 grid_elev = scipy_interp.griddata(
@@ -37,6 +41,13 @@ grid_elev = scipy_interp.griddata(
     (grid_lon, grid_lat),
     method='linear'
 )
+grid_elev_merc = scipy_interp.griddata(
+    (df['Longitude_Mercator'], df['Latitude']),
+    df['Elevation'],
+    (grid_lon_merc, grid_lat_merc),
+    method='linear'
+)
+
 # Fill NaNs with nearest
 if np.isnan(grid_elev).any():
     grid_elev_nearest = scipy_interp.griddata(
@@ -46,6 +57,15 @@ if np.isnan(grid_elev).any():
         method='nearest'
     )
     grid_elev = np.where(np.isnan(grid_elev), grid_elev_nearest, grid_elev)
+
+if np.isnan(grid_elev_merc).any():
+    grid_elev_merc_nearest = scipy_interp.griddata(
+        (df['Longitude_Mercator'], df['Latitude']),
+        df['Elevation'],
+        (grid_lon_merc, grid_lat_merc),
+        method='nearest'
+    )
+    grid_elev_merc = np.where(np.isnan(grid_elev_merc), grid_elev_merc_nearest, grid_elev_merc)
 
 print("Interpolating Ice Probability grid...")
 grid_ice = scipy_interp.griddata(
@@ -85,12 +105,12 @@ plt.style.use('dark_background')
 # -------------------------------------------------------------
 # 1. Real Satellite Basemap Overlay (Clean DEM without axes)
 # -------------------------------------------------------------
-print("Generating clean real satellite DEM basemap overlay...")
+print("Generating clean real satellite DEM basemap overlay (-180 to 180)...")
 fig = plt.figure(figsize=(12, 6), dpi=150)
 ax = plt.Axes(fig, [0., 0., 1., 1.])
 ax.set_axis_off()
 fig.add_axes(ax)
-ax.imshow(grid_elev.T, extent=(0, 360, -89.9, -88.0), origin='lower', cmap='bone', aspect='auto')
+ax.imshow(grid_elev_merc.T, extent=(-180, 180, -89.9, -88.0), origin='lower', cmap='bone', aspect='auto')
 basemap_path = os.path.join(out_dir, "real_lunar_surface_dem.png")
 fig.savefig(basemap_path, dpi=150, bbox_inches='tight', pad_inches=0)
 plt.close(fig)
