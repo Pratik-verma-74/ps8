@@ -116,22 +116,22 @@
                         <input type="checkbox" checked id="chk-ice" onclick="event.stopPropagation(); toggleLayer('ice');">
                     </div>
 
-                    <div class="layer-item active layer-landing" id="btn-layer-landing" onclick="toggleLayer('landing')">
+                    <div class="layer-item layer-landing" id="btn-layer-landing" onclick="toggleLayer('landing')">
                         <div class="layer-icon"><i data-lucide="target"></i></div>
                         <div class="layer-text">
                             <strong>Layer 2: Safe Landing Sites</strong>
                             <span>Touchdown Zones (Slope &lt; 12°)</span>
                         </div>
-                        <input type="checkbox" checked id="chk-landing" onclick="event.stopPropagation(); toggleLayer('landing');">
+                        <input type="checkbox" id="chk-landing" onclick="event.stopPropagation(); toggleLayer('landing');">
                     </div>
 
-                    <div class="layer-item active layer-route" id="btn-layer-route" onclick="toggleLayer('route')">
+                    <div class="layer-item layer-route" id="btn-layer-route" onclick="toggleLayer('route')">
                         <div class="layer-icon"><i data-lucide="navigation-2"></i></div>
                         <div class="layer-text">
                             <strong>Layer 3: Rover Trajectory</strong>
                             <span>A* Safest Path to Ice Deposits</span>
                         </div>
-                        <input type="checkbox" checked id="chk-route" onclick="event.stopPropagation(); toggleLayer('route');">
+                        <input type="checkbox" id="chk-route" onclick="event.stopPropagation(); toggleLayer('route');">
                     </div>
 
                     <div class="map-legend mt-auto">

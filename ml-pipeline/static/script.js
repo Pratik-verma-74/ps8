@@ -40,10 +40,10 @@ function initGISMap() {
         interactive: false
     }).addTo(gisMap);
 
-    // Layer Groups
+    // Layer Groups (Only Ice Detection active by default)
     iceLayerGroup = L.layerGroup().addTo(gisMap);
-    landingLayerGroup = L.layerGroup().addTo(gisMap);
-    routeLayerGroup = L.layerGroup().addTo(gisMap);
+    landingLayerGroup = L.layerGroup();
+    routeLayerGroup = L.layerGroup();
 
     populateGISLayers();
 }
