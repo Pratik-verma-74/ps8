@@ -310,9 +310,9 @@ body {
     box-shadow: 0 0 15px rgba(0, 242, 254, 0.15);
 }
 
-.layer-item.layer-ice.active { border-color: rgba(0, 242, 254, 0.7); background: rgba(0, 242, 254, 0.12); }
-.layer-item.layer-landing.active { border-color: rgba(16, 185, 129, 0.7); background: rgba(16, 185, 129, 0.12); }
-.layer-item.layer-route.active { border-color: rgba(245, 158, 11, 0.7); background: rgba(245, 158, 11, 0.12); }
+.layer-item.layer-ice.active { border-color: rgba(255, 255, 255, 0.85); background: rgba(255, 255, 255, 0.15); }
+.layer-item.layer-landing.active { border-color: rgba(0, 242, 254, 0.85); background: rgba(0, 242, 254, 0.15); }
+.layer-item.layer-route.active { border-color: rgba(16, 185, 129, 0.85); background: rgba(16, 185, 129, 0.15); }
 
 .layer-icon {
     width: 44px; height: 44px;
@@ -351,10 +351,10 @@ body {
 .map-legend h4 { font-size: 0.88rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;}
 .legend-row { display: flex; align-items: center; gap: 12px; font-size: 0.9rem; color: #fff;}
 .dot { width: 14px; height: 14px; border-radius: 50%; display: inline-block; }
-.dot-ice { background: var(--cyan); box-shadow: 0 0 10px var(--cyan); }
-.dot-landing { background: var(--emerald); box-shadow: 0 0 10px var(--emerald); }
+.dot-ice { background: #ffffff; box-shadow: 0 0 10px #ffffff; }
+.dot-landing { background: var(--cyan); box-shadow: 0 0 10px var(--cyan); }
 .line { width: 20px; height: 4px; display: inline-block; border-radius: 2px; }
-.line-route { background: var(--amber); box-shadow: 0 0 10px var(--amber); }
+.line-route { background: var(--emerald); box-shadow: 0 0 10px var(--emerald); }
 
 .map-wrapper {
     position: relative;

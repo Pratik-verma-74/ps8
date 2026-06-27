@@ -125,7 +125,7 @@ def get_deliverables():
 @app.get("/api/data")
 def query_dataset(
     page: int = Query(1, ge=1),
-    limit: int = Query(25, ge=1, le=100),
+    limit: int = Query(1000, ge=1, le=10000),
     min_ice: float = Query(0.0, ge=0.0, le=1.0),
     max_hazard: float = Query(100.0, ge=0.0, le=100.0),
     max_slope: float = Query(90.0, ge=0.0, le=90.0)

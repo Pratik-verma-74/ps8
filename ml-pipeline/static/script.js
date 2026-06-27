@@ -20,11 +20,11 @@ function initGISMap() {
     const container = document.getElementById("lunar-gis-map");
     if (!container || gisMap) return;
 
-    // Center on Lunar South Pole exploration sector (-88.95, 0.0)
+    // Center on visible Lunar South Pole exploration viewport (-77.0, 0.0)
     gisMap = L.map("lunar-gis-map", {
         attributionControl: true,
         zoomControl: true
-    }).setView([-88.95, 0.0], 5);
+    }).setView([-77.0, 0.0], 5);
 
     // Real OpenPlanetary Interactive Moon Basemap (EPSG:3857 compatible)
     L.tileLayer('https://cartocdn-gusc.global.ssl.fastly.net/opmbuilder/api/v1/map/named/opm-moon-basemap-v0-1/all/{z}/{x}/{y}.png', {
@@ -34,9 +34,9 @@ function initGISMap() {
     }).addTo(gisMap);
 
     // Add Real Lunar Surface DEM Satellite Overlay (Generated directly from ISRO Telemetry Dataset)
-    const demBounds = [[-89.9, -180.0], [-88.0, 180.0]];
+    const demBounds = [[-84.0, -180.0], [-70.0, 180.0]];
     L.imageOverlay('/static/maps/real_lunar_surface_dem.png', demBounds, {
-        opacity: 0.9,
+        opacity: 0.85,
         interactive: false
     }).addTo(gisMap);
 
@@ -50,35 +50,44 @@ function initGISMap() {
 
 async function populateGISLayers() {
     try {
-        const res = await fetch("/api/data?limit=100");
+        // Fetch 1000 real dataset telemetry rows
+        const res = await fetch("/api/data?limit=1000");
         const data = await res.json();
         const rows = data.rows || [];
 
         // Helper to convert 0..360 longitude to standard planetary Web Mercator -180..180
         const toMercLon = (lon) => (lon > 180 ? lon - 360 : lon);
 
-        // Layer 1: Ice Detection (Blue glowing circles over real coordinates)
-        rows.forEach((r, idx) => {
-            const lat = r.Latitude !== undefined ? r.Latitude : (-88.85 + Math.sin(idx)*0.4);
-            const lonRaw = r.Longitude !== undefined ? r.Longitude : (180.0 + Math.cos(idx)*20.0);
-            const lon = toMercLon(lonRaw);
+        // Helper to project real polar latitudes (-89.9 to -88.0) cleanly into visible map viewport (-84.0 to -70.0) avoiding Web Mercator -85° edge clipping
+        const toMapLat = (realLat) => {
+            const clamped = Math.max(-89.9, Math.min(-88.0, realLat));
+            return -70.0 + ((clamped - (-88.0)) / (-89.9 - (-88.0))) * (-14.0);
+        };
+
+        // Layer 1: Ice Detection (White glowing circles over real coordinates)
+        rows.forEach((r) => {
+            if (r.Latitude === undefined || r.Longitude === undefined) return;
+            const realLat = r.Latitude;
+            const realLonRaw = r.Longitude;
+            const mapLat = toMapLat(realLat);
+            const mapLon = toMercLon(realLonRaw);
             const iceProb = r.Ice_Probability !== undefined ? r.Ice_Probability : 0.75;
             
-            if (iceProb > 0.2 || idx % 3 === 0) {
-                const circle = L.circleMarker([lat, lon], {
-                    radius: 5 + (iceProb * 7),
-                    fillColor: "#00f2fe",
-                    color: "#fff",
+            if (iceProb > 0.3) {
+                const circle = L.circleMarker([mapLat, mapLon], {
+                    radius: 4 + (iceProb * 6),
+                    fillColor: "#ffffff",
+                    color: "#ffffff",
                     weight: 1.5,
-                    opacity: 0.9,
-                    fillOpacity: 0.75
+                    opacity: 0.95,
+                    fillOpacity: 0.85
                 });
 
                 circle.bindPopup(`
                     <div style="text-align:left; font-family:'Outfit',sans-serif;">
-                        <h4 style="color:#00f2fe; margin-bottom:6px;">❄️ Subsurface Ice Deposit</h4>
-                        <p style="margin:3px 0;"><strong>Latitude:</strong> ${lat.toFixed(4)}°</p>
-                        <p style="margin:3px 0;"><strong>Longitude:</strong> ${lonRaw.toFixed(4)}° (${lon.toFixed(4)}°)</p>
+                        <h4 style="color:#ffffff; margin-bottom:6px;">❄️ Subsurface Ice Deposit</h4>
+                        <p style="margin:3px 0;"><strong>Real Latitude:</strong> ${realLat.toFixed(4)}°</p>
+                        <p style="margin:3px 0;"><strong>Real Longitude:</strong> ${realLonRaw.toFixed(4)}° (${mapLon.toFixed(4)}°)</p>
                         <p style="margin:3px 0;"><strong>Radar Probability:</strong> <span style="color:#00f2fe; font-weight:700;">${(iceProb*100).toFixed(1)}%</span></p>
                         <p style="margin:3px 0;"><strong>Surface Temp:</strong> ${r.Temperature || 154.2} K</p>
                     </div>
@@ -87,19 +96,21 @@ async function populateGISLayers() {
             }
         });
 
-        // Layer 2: Safe Landing Sites (Green targets on real coordinates)
-        rows.forEach((r, idx) => {
-            const lat = r.Latitude !== undefined ? r.Latitude : (-88.85 + Math.cos(idx)*0.35);
-            const lonRaw = r.Longitude !== undefined ? r.Longitude : (180.0 + Math.sin(idx)*18.0);
-            const lon = toMercLon(lonRaw);
+        // Layer 2: Safe Landing Sites (Blue glowing zones on real coordinates)
+        rows.forEach((r) => {
+            if (r.Latitude === undefined || r.Longitude === undefined) return;
+            const realLat = r.Latitude;
+            const realLonRaw = r.Longitude;
+            const mapLat = toMapLat(realLat);
+            const mapLon = toMercLon(realLonRaw);
             const slope = r.Slope !== undefined ? r.Slope : 6.4;
             const hazard = r.Hazard_Score !== undefined ? r.Hazard_Score : 15.0;
             
             if (slope < 12 && hazard < 25) {
-                const landingMarker = L.circleMarker([lat, lon], {
+                const landingMarker = L.circleMarker([mapLat, mapLon], {
                     radius: 7,
-                    fillColor: "#10b981",
-                    color: "#fff",
+                    fillColor: "#00f2fe",
+                    color: "#3b82f6",
                     weight: 2,
                     opacity: 1,
                     fillOpacity: 0.9
@@ -107,49 +118,51 @@ async function populateGISLayers() {
 
                 landingMarker.bindPopup(`
                     <div style="text-align:left; font-family:'Outfit',sans-serif;">
-                        <h4 style="color:#10b981; margin-bottom:6px;">🎯 Evaluated Touchdown Zone</h4>
-                        <p style="margin:3px 0;"><strong>Slope Angle:</strong> <span style="color:#10b981; font-weight:700;">${slope.toFixed(1)}°</span> (Safe &lt; 12°)</p>
+                        <h4 style="color:#00f2fe; margin-bottom:6px;">🎯 Evaluated Touchdown Zone</h4>
+                        <p style="margin:3px 0;"><strong>Real Latitude:</strong> ${realLat.toFixed(4)}°</p>
+                        <p style="margin:3px 0;"><strong>Real Longitude:</strong> ${realLonRaw.toFixed(4)}°</p>
+                        <p style="margin:3px 0;"><strong>Slope Angle:</strong> <span style="color:#00f2fe; font-weight:700;">${slope.toFixed(1)}°</span> (Safe &lt; 12°)</p>
                         <p style="margin:3px 0;"><strong>Hazard Score:</strong> ${hazard.toFixed(1)}</p>
-                        <p style="margin:3px 0;"><strong>Solar Illumination:</strong> >280 Hrs</p>
                     </div>
                 `);
                 landingLayerGroup.addLayer(landingMarker);
             }
         });
 
-        // Layer 3: Rover Route Trajectory (Animated dashed path between real safe site and ice deposit)
+        // Layer 3: Rover Route Trajectory (Green line with Red start/end pins)
         const safeRows = rows.filter(r => (r.Slope || 99) < 12 && (r.Hazard_Score || 99) < 25);
         const iceRows = rows.filter(r => (r.Ice_Probability || 0) > 0.6);
         
-        const startR = safeRows[0] || rows[0] || {Latitude: -89.1, Longitude: 140.0};
-        const endR = iceRows[0] || rows[rows.length-1] || {Latitude: -88.5, Longitude: 300.0};
-        
-        const startPoint = [startR.Latitude, toMercLon(startR.Longitude)];
-        const midPoint1 = [(startR.Latitude*2 + endR.Latitude)/3 + 0.05, toMercLon((startR.Longitude*2 + endR.Longitude)/3 + 5)];
-        const midPoint2 = [(startR.Latitude + endR.Latitude*2)/3 - 0.05, toMercLon((startR.Longitude + endR.Longitude*2)/3 - 5)];
-        const endPoint = [endR.Latitude, toMercLon(endR.Longitude)];
+        if (safeRows.length > 0 && iceRows.length > 0) {
+            const startR = safeRows[0];
+            const endR = iceRows[0];
+            
+            const startPoint = [toMapLat(startR.Latitude), toMercLon(startR.Longitude)];
+            const midPoint1 = [(startPoint[0]*2 + toMapLat(endR.Latitude))/3 + 0.8, (startPoint[1]*2 + toMercLon(endR.Longitude))/3 + 3];
+            const midPoint2 = [(startPoint[0] + toMapLat(endR.Latitude)*2)/3 - 0.8, (startPoint[1] + toMercLon(endR.Longitude)*2)/3 - 3];
+            const endPoint = [toMapLat(endR.Latitude), toMercLon(endR.Longitude)];
 
-        const routePolyline = L.polyline([startPoint, midPoint1, midPoint2, endPoint], {
-            color: '#f59e0b',
-            weight: 5,
-            dashArray: '10, 10',
-            opacity: 1
-        });
+            const routePolyline = L.polyline([startPoint, midPoint1, midPoint2, endPoint], {
+                color: '#10b981',
+                weight: 5,
+                dashArray: '10, 10',
+                opacity: 1
+            });
 
-        routePolyline.bindPopup(`
-            <div style="text-align:left; font-family:'Outfit',sans-serif;">
-                <h4 style="color:#f59e0b; margin-bottom:6px;">🚀 Autonomous Rover Trajectory</h4>
-                <p style="margin:3px 0;"><strong>Algorithm:</strong> A* Heuristic Search</p>
-                <p style="margin:3px 0;"><strong>Start Lat/Lon:</strong> ${startPoint[0].toFixed(2)}°, ${startPoint[1].toFixed(1)}°</p>
-                <p style="margin:3px 0;"><strong>Target Lat/Lon:</strong> ${endPoint[0].toFixed(2)}°, ${endPoint[1].toFixed(1)}°</p>
-            </div>
-        `);
-        routeLayerGroup.addLayer(routePolyline);
+            routePolyline.bindPopup(`
+                <div style="text-align:left; font-family:'Outfit',sans-serif;">
+                    <h4 style="color:#10b981; margin-bottom:6px;">🚀 Autonomous Rover Trajectory</h4>
+                    <p style="margin:3px 0;"><strong>Algorithm:</strong> A* Heuristic Search</p>
+                    <p style="margin:3px 0;"><strong>Start Lat/Lon:</strong> ${startR.Latitude.toFixed(4)}°, ${startR.Longitude.toFixed(4)}°</p>
+                    <p style="margin:3px 0;"><strong>Target Lat/Lon:</strong> ${endR.Latitude.toFixed(4)}°, ${endR.Longitude.toFixed(4)}°</p>
+                </div>
+            `);
+            routeLayerGroup.addLayer(routePolyline);
 
-        // Add start & end pins
-        L.circleMarker(startPoint, {radius: 9, fillColor: "#10b981", color: "#fff", weight: 2.5, fillOpacity: 1}).bindPopup("🏁 Touchdown Start Point").addTo(routeLayerGroup);
-        L.circleMarker(endPoint, {radius: 9, fillColor: "#00f2fe", color: "#fff", weight: 2.5, fillOpacity: 1}).bindPopup("🎯 Target Ice Crater").addTo(routeLayerGroup);
-
+            // Add Red start & end pins
+            L.circleMarker(startPoint, {radius: 9, fillColor: "#ef4444", color: "#fff", weight: 2.5, fillOpacity: 1}).bindPopup("🏁 Touchdown Start Point (Red)").addTo(routeLayerGroup);
+            L.circleMarker(endPoint, {radius: 9, fillColor: "#ef4444", color: "#fff", weight: 2.5, fillOpacity: 1}).bindPopup("🎯 Target Ice Crater (Red)").addTo(routeLayerGroup);
+        }
     } catch (e) {
         console.error("Error populating GIS layers:", e);
     }
