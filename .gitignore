@@ -1,8 +1,13 @@
-__pycache__/
-*.py[cod]
-*$py.class
-.env
+# Node
+node_modules/
+frontend/node_modules/
+
+# Python
 venv/
-env/
-*.log
-.DS_Store
+.env
+__pycache__/
+*.pyc
+
+# build
+frontend/src/tailwind.generated.css
+dist/

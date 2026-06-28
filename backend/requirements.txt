@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+pandas
+torch
+transformers
+pds4_tools
+rasterio
+opencv-python
+scikit-learn
+matplotlib
