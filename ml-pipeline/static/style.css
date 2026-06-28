@@ -49,7 +49,8 @@ body {
 }
 
 .glass-panel:hover {
-    border-color: rgba(255, 255, 255, 0.2);
+    border-color: var(--cyan);
+    box-shadow: 0 12px 45px rgba(0, 242, 254, 0.18);
 }
 
 .app-container {
@@ -372,18 +373,30 @@ body {
 .mission-stats-hud {
     position: absolute;
     top: 20px; right: 20px;
-    background: rgba(8, 12, 24, 0.88);
-    backdrop-filter: blur(16px);
-    border: 1px solid var(--border-glass);
-    padding: 12px 18px;
-    border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    background: rgba(6, 10, 22, 0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(0, 242, 254, 0.45);
+    padding: 14px 24px;
+    border-radius: 20px;
+    box-shadow: 0 12px 35px rgba(0, 242, 254, 0.25);
     z-index: 500;
-    display: flex; gap: 16px; align-items: center; flex-wrap: wrap;
+    display: flex; gap: 24px; align-items: center; flex-wrap: wrap;
 }
 
 .stat-badge {
-    display: flex; flex-direction: column; gap: 2px;
+    display: flex; flex-direction: column; gap: 4px;
+    position: relative;
+}
+
+.stat-badge:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    right: -12px;
+    top: 10%;
+    height: 80%;
+    width: 1px;
+    background: rgba(255, 255, 255, 0.15);
 }
 
 .stat-label {
@@ -391,12 +404,13 @@ body {
 }
 
 .stat-val {
-    font-size: 1.15rem; font-weight: 800; color: #fff;
+    font-size: 1.25rem; font-weight: 800; color: #fff;
+    font-family: var(--font-heading);
 }
 
-.stat-val.ice-val { color: #ffffff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.6); }
-.stat-val.landing-val { color: var(--cyan); text-shadow: 0 0 10px rgba(0, 242, 254, 0.6); }
-.stat-val.ai-val { color: var(--emerald); text-shadow: 0 0 10px rgba(16, 185, 129, 0.6); }
+.stat-val.ice-val { color: #ffffff; text-shadow: 0 0 12px rgba(255, 255, 255, 0.8); }
+.stat-val.landing-val { color: var(--cyan); text-shadow: 0 0 12px rgba(0, 242, 254, 0.8); }
+.stat-val.ai-val { color: var(--emerald); text-shadow: 0 0 12px rgba(16, 185, 129, 0.8); }
 
 .map-overlay-info {
     position: absolute;

@@ -217,6 +217,15 @@ async function fetchStats() {
         animateCounter("stat-landing", data.safe_landing_sites);
         document.getElementById("stat-temp").textContent = `${data.avg_temperature} K`;
         
+        // Update map overlay HUD dynamically from live dataset metrics
+        animateCounter("hud-total", data.total_data_points);
+        animateCounter("hud-ice", data.high_ice_zones);
+        animateCounter("hud-landing", data.safe_landing_sites);
+        const hudConf = document.getElementById("hud-confidence");
+        if (hudConf && data.ai_confidence !== undefined) {
+            hudConf.textContent = `${data.ai_confidence}%`;
+        }
+        
         if (data.status) {
             document.getElementById("telemetry-status").textContent = data.status.toUpperCase();
         }
@@ -227,9 +236,13 @@ async function fetchStats() {
 
 function animateCounter(elementId, targetValue) {
     const el = document.getElementById(elementId);
-    if (!el) return;
+    if (!el || targetValue === undefined || targetValue === null || isNaN(targetValue)) return;
+    if (targetValue === 0) {
+        el.textContent = "0";
+        return;
+    }
     let current = 0;
-    const step = Math.ceil(targetValue / 30);
+    const step = Math.max(1, Math.ceil(targetValue / 30));
     const interval = setInterval(() => {
         current += step;
         if (current >= targetValue) {

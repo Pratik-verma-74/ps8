@@ -68,12 +68,13 @@ def serve_dashboard():
 def get_mission_stats():
     if df_lunar is None:
         return {
-            "total_data_points": 5000,
-            "high_ice_zones": 412,
-            "safe_landing_sites": 850,
-            "avg_temperature": 165.4,
-            "avg_hazard_score": 28.5,
-            "status": "Simulated Mode"
+            "total_data_points": 0,
+            "high_ice_zones": 0,
+            "safe_landing_sites": 0,
+            "avg_temperature": 0.0,
+            "avg_hazard_score": 0.0,
+            "ai_confidence": 0.0,
+            "status": "Dataset Missing"
         }
     
     total = len(df_lunar)
@@ -82,12 +83,19 @@ def get_mission_stats():
     avg_temp = round(float(df_lunar["Temperature"].mean()), 1)
     avg_hazard = round(float(df_lunar["Hazard_Score"].mean()), 1)
     
+    # Strictly compute AI model confidence from real dataset predictions
+    if high_ice > 0:
+        ai_confidence = round(float(df_lunar[df_lunar["Ice_Probability"] > 0.5]["Ice_Probability"].mean() * 100), 1)
+    else:
+        ai_confidence = round(float(df_lunar["Ice_Probability"].mean() * 100), 1)
+    
     return {
         "total_data_points": total,
         "high_ice_zones": high_ice,
         "safe_landing_sites": safe_landing,
         "avg_temperature": avg_temp,
         "avg_hazard_score": avg_hazard,
+        "ai_confidence": ai_confidence,
         "status": "Live Telemetry Online"
     }
 
@@ -191,11 +199,14 @@ def simulate_rover_route():
             "status": "Safe Traverse" if haz < 35 else "Caution: Moderate Terrain"
         })
         
+    dist_km = round(math.sqrt((target["Latitude"]-start["Latitude"])**2 + (target["Longitude"]-start["Longitude"])**2) * 30.3, 2)
+    batt_pct = round(min(99.9, max(1.0, dist_km * 1.8 + float(start["Hazard_Score"] + target["Hazard_Score"]) * 0.12)), 1)
+
     return {
         "algorithm": "A* Heuristic Search (Optimal Path)",
         "start_point": {"lat": round(start["Latitude"], 4), "lon": round(start["Longitude"], 4)},
         "target_point": {"lat": round(target["Latitude"], 4), "lon": round(target["Longitude"], 4)},
-        "total_distance_km": round(math.sqrt((target["Latitude"]-start["Latitude"])**2 + (target["Longitude"]-start["Longitude"])**2) * 30.3, 2),
-        "est_battery_used": "18.4%",
+        "total_distance_km": dist_km,
+        "est_battery_used": f"{batt_pct}%",
         "waypoints": waypoints
     }

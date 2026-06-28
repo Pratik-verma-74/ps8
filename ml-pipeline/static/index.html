@@ -26,8 +26,8 @@
                     <i data-lucide="rocket" class="icon-pulse"></i>
                 </div>
                 <div class="logo-text">
-                    <h1>ISRO LUNAR MISSION AI</h1>
-                    <span>SOUTH POLE INTELLIGENCE & NAVIGATION</span>
+                    <h1>ISRO & NASA JOINT MISSION AI</h1>
+                    <span>CHANDRAYAAN-4 / ARTEMIS III COMMAND CENTER</span>
                 </div>
             </div>
             <nav class="nav-tabs">
@@ -56,7 +56,7 @@
                 <div class="stat-icon cyan"><i data-lucide="database"></i></div>
                 <div class="stat-info">
                     <span class="stat-label">Total Data Points</span>
-                    <h3 id="stat-total">5,000+</h3>
+                    <h3 id="stat-total">Loading...</h3>
                     <p class="stat-sub">OHRC + LROC + DFSAR + Diviner</p>
                 </div>
             </div>
@@ -89,8 +89,8 @@
         <!-- TAB 1: REAL GIS MOON MAP (GOOGLE MAPS STYLE) -->
         <main id="tab-gismap" class="tab-content active">
             <div class="section-header">
-                <h2>Interactive Real Moon Surface Map (Google Maps Style)</h2>
-                <p>Pan and zoom across real NASA LROC Lunar South Pole topography. Toggle multi-modal AI prediction overlays below.</p>
+                <h2>🛰️ Live Lunar South Pole GIS Telemetry Console</h2>
+                <p>Real-time rendering of fused ISRO OHRC / NASA LROC satellite telemetry. Toggle multi-modal AI prediction overlays below.</p>
             </div>
 
             <div class="gis-layout glass-panel">
@@ -145,10 +145,10 @@
                 <div class="map-wrapper">
                     <div id="lunar-gis-map"></div>
                     <div class="mission-stats-hud">
-                        <div class="stat-badge"><span class="stat-label">🛰️ Telemetry Points</span><span class="stat-val">5,000</span></div>
-                        <div class="stat-badge"><span class="stat-label">❄️ Ice Craters (>50%)</span><span class="stat-val ice-val">526</span></div>
-                        <div class="stat-badge"><span class="stat-label">🎯 Safe Touchdown</span><span class="stat-val landing-val">142</span></div>
-                        <div class="stat-badge"><span class="stat-label">⚡ AI Confidence</span><span class="stat-val ai-val">94.2%</span></div>
+                        <div class="stat-badge"><span class="stat-label">🛰️ Telemetry Points</span><span class="stat-val" id="hud-total">Loading...</span></div>
+                        <div class="stat-badge"><span class="stat-label">❄️ Ice Craters (>50%)</span><span class="stat-val ice-val" id="hud-ice">Loading...</span></div>
+                        <div class="stat-badge"><span class="stat-label">🎯 Safe Touchdown</span><span class="stat-val landing-val" id="hud-landing">Loading...</span></div>
+                        <div class="stat-badge"><span class="stat-label">⚡ AI Confidence</span><span class="stat-val ai-val" id="hud-confidence">Loading...</span></div>
                     </div>
                     <div class="map-overlay-info">
                         <span><i data-lucide="crosshair"></i> South Pole Exploration Sector (Lat -88.0° to -89.9°)</span>
