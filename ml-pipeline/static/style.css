@@ -369,6 +369,35 @@ body {
     background: #000;
 }
 
+.mission-stats-hud {
+    position: absolute;
+    top: 20px; right: 20px;
+    background: rgba(8, 12, 24, 0.88);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--border-glass);
+    padding: 12px 18px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    z-index: 500;
+    display: flex; gap: 16px; align-items: center; flex-wrap: wrap;
+}
+
+.stat-badge {
+    display: flex; flex-direction: column; gap: 2px;
+}
+
+.stat-label {
+    font-size: 0.72rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+}
+
+.stat-val {
+    font-size: 1.15rem; font-weight: 800; color: #fff;
+}
+
+.stat-val.ice-val { color: #ffffff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.6); }
+.stat-val.landing-val { color: var(--cyan); text-shadow: 0 0 10px rgba(0, 242, 254, 0.6); }
+.stat-val.ai-val { color: var(--emerald); text-shadow: 0 0 10px rgba(16, 185, 129, 0.6); }
+
 .map-overlay-info {
     position: absolute;
     bottom: 24px; right: 24px;
