@@ -9,6 +9,7 @@ import { RadarDashboard } from "./features/radar-tracking/RadarDashboard";
 import { DigitalTwinDashboard } from "./features/digital-twin/DigitalTwinDashboard";
 import { SimulationDashboard } from "./features/simulation/SimulationDashboard";
 import { TelemetryDashboard } from "./features/telemetry/TelemetryDashboard";
+import { MissionDatasetsDashboard } from "./features/datasets/MissionDatasetsDashboard";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route index element={<Navigate to="/all-in-one" replace />} />
           <Route path="all-in-one" element={<AllInOneDashboard />} />
           <Route path="mission-control" element={<AllInOneDashboard />} />
+          <Route path="datasets" element={<MissionDatasetsDashboard />} />
           <Route path="gis-only" element={<Dashboard />} />
           <Route path="intelligence" element={<IceMappingDashboard />} />
           <Route path="science/ice-volume" element={<IceMappingDashboard />} />

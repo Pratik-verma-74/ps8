@@ -13,13 +13,15 @@ import {
   Radio, 
   FileText,
   ChevronRight,
-  ChevronLeft
+  ChevronLeft,
+  Database
 } from "lucide-react";
 import { cn } from "../../utils/cn";
 import { motion, AnimatePresence } from "framer-motion";
 
 const NAV_ITEMS = [
   { label: "🛰️ Spacecraft Cockpit", path: "/all-in-one", icon: LayoutDashboard },
+  { label: "📊 5-Stage Datasets (CSV)", path: "/datasets", icon: Database },
   { label: "GIS Map Only", path: "/gis-only", icon: Globe },
   { label: "PSRs Mapping", path: "/intelligence", icon: Globe },
   { label: "OHRC Morphology", path: "/twin", icon: Mountain },

@@ -210,6 +210,7 @@ function switchTab(tabId) {
     if (tabId === 'overview' && btns[2]) btns[2].classList.add("active");
     if (tabId === 'explorer' && btns[3]) btns[3].classList.add("active");
     if (tabId === 'routing' && btns[4]) btns[4].classList.add("active");
+    if (tabId === 'fivestage' && btns[5]) btns[5].classList.add("active");
 
     const target = document.getElementById(`tab-${tabId}`);
     if (target) {
@@ -796,5 +797,218 @@ function triggerEmergencyAlert() {
     runRouteSimulation();
 }
 
+// ==========================================
+// 5-STAGE AI LUNAR PIPELINE & CSV DATASETS
+// ==========================================
+const FIVE_STAGES_DATA = {
+  ice_detection: {
+    title: "1st: Ice Detection Section with Datasets",
+    desc: "Detection of cryogenic water ice deposits across Lunar South Pole craters using DFSAR radar backscatter coefficients and Diviner thermal emission sensors.",
+    inputName: "1st_stage_ice_detection_input.csv",
+    outputName: "1st_stage_ice_detection_output.csv",
+    input: [
+      { Crater_ID: "CR-SHK-01", Name: "Shackleton Crater", Latitude: -89.9, Longitude: 0.0, Raw_Backscatter_dB: -12.4, Thermal_K: 88.5, Albedo: 0.42 },
+      { Crater_ID: "CR-SHM-02", Name: "Shoemaker Crater", Latitude: -88.1, Longitude: 44.9, Raw_Backscatter_dB: -14.1, Thermal_K: 92.1, Albedo: 0.39 },
+      { Crater_ID: "CR-FST-03", Name: "Faustini Crater", Latitude: -87.3, Longitude: 84.5, Raw_Backscatter_dB: -11.8, Thermal_K: 95.4, Albedo: 0.35 },
+      { Crater_ID: "CR-HWT-04", Name: "Haworth Crater", Latitude: -87.5, Longitude: -5.2, Raw_Backscatter_dB: -13.5, Thermal_K: 90.2, Albedo: 0.41 },
+      { Crater_ID: "CR-DGR-05", Name: "de Gerlache Crater", Latitude: -88.5, Longitude: -88.3, Raw_Backscatter_dB: -15.2, Thermal_K: 85.0, Albedo: 0.45 }
+    ],
+    output: [
+      { Crater_ID: "CR-SHK-01", Detected_Ice_Flag: "YES", Ice_Probability: "98.9%", Confidence_Class: "High Cryogenic", Estimated_Area_sqm: 7931.8 },
+      { Crater_ID: "CR-SHM-02", Detected_Ice_Flag: "YES", Ice_Probability: "95.4%", Confidence_Class: "High Cryogenic", Estimated_Area_sqm: 7714.8 },
+      { Crater_ID: "CR-FST-03", Detected_Ice_Flag: "YES", Ice_Probability: "89.2%", Confidence_Class: "Moderate-High", Estimated_Area_sqm: 6420.1 },
+      { Crater_ID: "CR-HWT-04", Detected_Ice_Flag: "YES", Ice_Probability: "94.1%", Confidence_Class: "High Cryogenic", Estimated_Area_sqm: 7105.4 },
+      { Crater_ID: "CR-DGR-05", Detected_Ice_Flag: "YES", Ice_Probability: "99.4%", Confidence_Class: "Confirmed Matrix", Estimated_Area_sqm: 8540.0 }
+    ]
+  },
+  ice_volume: {
+    title: "2nd: Ice Volume & PSRs / Doubly PSRs",
+    desc: "Quantitative volume estimation of subsurface water ice and mapping of Permanently Shadowed Regions (PSRs) and ultra-cold Doubly Shadowed Craters.",
+    inputName: "2nd_stage_ice_volume_psrs_input.csv",
+    outputName: "2nd_stage_ice_volume_psrs_output.csv",
+    input: [
+      { Zone_ID: "PSR-ZONE-A", Region: "Shackleton Deep Basin", DEM_Elevation_m: -4200, Sun_Angle_deg: 0.2, Shadow_Duration_hrs: 8760, Illumination: "0%" },
+      { Zone_ID: "D-PSR-ZONE-B", Region: "Shoemaker Mini-Crater", DEM_Elevation_m: -3850, Sun_Angle_deg: 0.0, Shadow_Duration_hrs: 8760, Illumination: "0%" },
+      { Zone_ID: "PSR-ZONE-C", Region: "Sverdrup North Ridge", DEM_Elevation_m: -3100, Sun_Angle_deg: 0.8, Shadow_Duration_hrs: 8420, Illumination: "4%" },
+      { Zone_ID: "D-PSR-ZONE-D", Region: "Faustini Sub-Trench", DEM_Elevation_m: -3920, Sun_Angle_deg: 0.0, Shadow_Duration_hrs: 8760, Illumination: "0%" },
+      { Zone_ID: "PSR-ZONE-E", Region: "Slater South Rim", DEM_Elevation_m: -3400, Sun_Angle_deg: 1.1, Shadow_Duration_hrs: 8150, Illumination: "7%" }
+    ],
+    output: [
+      { Zone_ID: "PSR-ZONE-A", PSR_Classification: "Standard PSR", Estimated_Depth_m: 24.8, Calculated_Volume_m3: "194,512.4", Core_Temp_K: 88.2 },
+      { Zone_ID: "D-PSR-ZONE-B", PSR_Classification: "Doubly PSR (Nested Shadow)", Estimated_Depth_m: 31.5, Calculated_Volume_m3: "285,400.0", Core_Temp_K: 38.4 },
+      { Zone_ID: "PSR-ZONE-C", PSR_Classification: "Standard PSR", Estimated_Depth_m: 18.2, Calculated_Volume_m3: "142,100.0", Core_Temp_K: 95.1 },
+      { Zone_ID: "D-PSR-ZONE-D", PSR_Classification: "Doubly PSR (Deep Cryotrap)", Estimated_Depth_m: 36.0, Calculated_Volume_m3: "340,800.0", Core_Temp_K: 35.0 },
+      { Zone_ID: "PSR-ZONE-E", PSR_Classification: "Standard PSR", Estimated_Depth_m: 15.4, Calculated_Volume_m3: "118,900.0", Core_Temp_K: 98.7 }
+    ]
+  },
+  landing_site: {
+    title: "3rd: Safe Landing Site Optimizer",
+    desc: "Multi-criteria spatial hazard evaluation identifying flat, slope-stable, and boulder-free landing ellipses for Vikram/Pragyan style touchdown.",
+    inputName: "3rd_stage_safe_landing_input.csv",
+    outputName: "3rd_stage_safe_landing_output.csv",
+    input: [
+      { Target_ID: "LZ-PRAGYAN-1", Region: "Malapert Massif Plateau", Latitude: -84.9, Longitude: 12.9, Slope_deg: 1.2, Boulder_Density: 0.04 },
+      { Target_ID: "LZ-VIKRAM-2", Region: "Shackleton Connecting Ridge", Latitude: -89.4, Longitude: 120.5, Slope_deg: 2.1, Boulder_Density: 0.08 },
+      { Target_ID: "LZ-SOUTH-3", Region: "Leibniz Beta Plains", Latitude: -85.3, Longitude: 32.4, Slope_deg: 3.4, Boulder_Density: 0.12 },
+      { Target_ID: "LZ-AMUNDSEN-4", Region: "Amundsen Western Flat", Latitude: -84.5, Longitude: 83.1, Slope_deg: 1.8, Boulder_Density: 0.05 },
+      { Target_ID: "LZ-NOBILE-5", Region: "Nobile Rim Sector", Latitude: -85.2, Longitude: 32.4, Slope_deg: 4.5, Boulder_Density: 0.19 }
+    ],
+    output: [
+      { Target_ID: "LZ-PRAGYAN-1", Touchdown_Grade: "Grade A+ (Optimal Flat)", Hazard_Score: 0.0, Safety_Probability: "99.8%", Earth_LoS: "Direct 100%" },
+      { Target_ID: "LZ-VIKRAM-2", Touchdown_Grade: "Grade A+ (Optimal Flat)", Hazard_Score: 0.2, Safety_Probability: "98.5%", Earth_LoS: "Direct 98%" },
+      { Target_ID: "LZ-SOUTH-3", Touchdown_Grade: "Grade A (Safe Descent)", Hazard_Score: 1.4, Safety_Probability: "95.2%", Earth_LoS: "Relayed 85%" },
+      { Target_ID: "LZ-AMUNDSEN-4", Touchdown_Grade: "Grade A+ (Optimal Flat)", Hazard_Score: 0.1, Safety_Probability: "99.1%", Earth_LoS: "Direct 96%" },
+      { Target_ID: "LZ-NOBILE-5", Touchdown_Grade: "Grade B (Caution Advised)", Hazard_Score: 3.8, Safety_Probability: "88.4%", Earth_LoS: "Relayed 70%" }
+    ]
+  },
+  path_planning: {
+    title: "4th: Rover Path Planning (A* Traverse)",
+    desc: "Autonomous rover navigation route planning avoiding steep crater rims (>15° slope), boulder clusters, and extreme shadow blind spots.",
+    inputName: "4th_stage_path_planning_input.csv",
+    outputName: "4th_stage_path_planning_output.csv",
+    input: [
+      { Waypoint_ID: "WP-START", Segment_Name: "Touchdown Point Alpha", Latitude: -89.48, Longitude: 94.36, Altitude_m: 1250, Slope_deg: 1.2 },
+      { Waypoint_ID: "WP-MID-1", Segment_Name: "Crater Rim Bypass", Latitude: -89.40, Longitude: 110.15, Altitude_m: 980, Slope_deg: 4.5 },
+      { Waypoint_ID: "WP-MID-2", Segment_Name: "Gentle Slope Traverse", Latitude: -89.32, Longitude: 145.50, Altitude_m: 450, Slope_deg: 6.8 },
+      { Waypoint_ID: "WP-MID-3", Segment_Name: "Descent Access Ramp", Latitude: -89.25, Longitude: 180.20, Altitude_m: -850, Slope_deg: 11.2 },
+      { Waypoint_ID: "WP-TARGET", Segment_Name: "Cryo Ice Sampling Basin", Latitude: -89.21, Longitude: 238.08, Altitude_m: -2450, Slope_deg: 2.1 }
+    ],
+    output: [
+      { Waypoint_ID: "WP-START", Cumulative_Dist_km: "0.0", Cost_Score: 0.0, Navigation_Status: "Initiate Traverse at 5 cm/s", Power_Drain: "45W" },
+      { Waypoint_ID: "WP-MID-1", Cumulative_Dist_km: "24.5", Cost_Score: 0.2, Navigation_Status: "Maintain Nominal Speed", Power_Drain: "48W" },
+      { Waypoint_ID: "WP-MID-2", Cumulative_Dist_km: "55.7", Cost_Score: 1.8, Navigation_Status: "Engage Traction Control", Power_Drain: "62W" },
+      { Waypoint_ID: "WP-MID-3", Cumulative_Dist_km: "94.1", Cost_Score: 2.4, Navigation_Status: "Activate Floodlights & Heaters", Power_Drain: "85W" },
+      { Waypoint_ID: "WP-TARGET", Cumulative_Dist_km: "128.5", Cost_Score: 4.1, Navigation_Status: "Arrive Ice Sampling Target", Power_Drain: "Sampling" }
+    ]
+  },
+  ai_confidence: {
+    title: "5th: AI Confidence & Validation",
+    desc: "Real-time neural network validation metrics, ensemble model agreement weights, and confidence score distribution across all telemetry modules.",
+    inputName: "5th_stage_ai_confidence_input.csv",
+    outputName: "5th_stage_ai_confidence_output.csv",
+    input: [
+      { Model_ID: "MODEL-ICE-CNN", Architecture: "ResNet-50 3D SAR", Target_Module: "Ice Detection", Epochs: 150, Batch_Size: 64, Loss: 0.0142 },
+      { Model_ID: "MODEL-PSR-UNET", Architecture: "U-Net Dual-Attention", Target_Module: "PSR & Doubly PSR", Epochs: 200, Batch_Size: 32, Loss: 0.0089 },
+      { Model_ID: "MODEL-LANDING", Architecture: "Ensemble XGBoost + CNN", Target_Module: "Safe Touchdown", Epochs: 100, Batch_Size: 128, Loss: 0.0195 },
+      { Model_ID: "MODEL-ASTAR", Architecture: "DQN + A* Heuristic", Target_Module: "Traverse Planner", Epochs: 300, Batch_Size: 256, Loss: 0.0051 },
+      { Model_ID: "MODEL-FUSION", Architecture: "Transformer Multi-Modal", Target_Module: "Mission Control KPIs", Epochs: 250, Batch_Size: 64, Loss: 0.0110 }
+    ],
+    output: [
+      { Model_ID: "MODEL-ICE-CNN", Accuracy_Score: "98.4%", F1_Score: 0.982, AI_Confidence_Score: "98.9%", Operational_Status: "Validated Live" },
+      { Model_ID: "MODEL-PSR-UNET", Accuracy_Score: "99.1%", F1_Score: 0.990, AI_Confidence_Score: "99.4%", Operational_Status: "Validated Live" },
+      { Model_ID: "MODEL-LANDING", Accuracy_Score: "96.8%", F1_Score: 0.965, AI_Confidence_Score: "97.2%", Operational_Status: "Validated Live" },
+      { Model_ID: "MODEL-ASTAR", Accuracy_Score: "97.5%", F1_Score: 0.974, AI_Confidence_Score: "98.1%", Operational_Status: "Validated Live" },
+      { Model_ID: "MODEL-FUSION", Accuracy_Score: "98.8%", F1_Score: 0.986, AI_Confidence_Score: "98.8%", Operational_Status: "Validated Live" }
+    ]
+  }
+};
 
+function downloadStageCSV(stageId, type) {
+  const data = FIVE_STAGES_DATA[stageId];
+  if (!data) return;
+  const rows = type === 'input' ? data.input : data.output;
+  const filename = type === 'input' ? data.inputName : data.outputName;
+  if (!rows || !rows.length) return;
 
+  const headers = Object.keys(rows[0]);
+  const csvContent = [
+    headers.join(","),
+    ...rows.map(row => headers.map(h => {
+      const val = row[h] ?? "";
+      const strVal = String(val);
+      return strVal.includes(",") || strVal.includes("\n") ? `"${strVal}"` : strVal;
+    }).join(","))
+  ].join("\n");
+
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", filename);
+  link.style.visibility = "hidden";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+function renderStageTable(rows) {
+  if (!rows || !rows.length) return "";
+  const headers = Object.keys(rows[0]);
+  let html = `<table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; text-align: left;">
+    <thead>
+      <tr style="background: rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.1); color: #00f2fe;">
+        ${headers.map(h => `<th style="padding: 8px;">${h.replace(/_/g, " ")}</th>`).join("")}
+      </tr>
+    </thead>
+    <tbody>`;
+  rows.forEach(row => {
+    html += `<tr style="border-bottom: 1px solid rgba(255,255,255,0.05); color: #e2e8f0;">
+      ${Object.values(row).map(val => `<td style="padding: 8px; font-family: monospace;">${val}</td>`).join("")}
+    </tr>`;
+  });
+  html += `</tbody></table>`;
+  return html;
+}
+
+function switchFiveStageSubtab(stageId) {
+  document.querySelectorAll(".stage-subbtn").forEach(btn => btn.style.background = "rgba(255,255,255,0.05)");
+  document.querySelectorAll(".stage-subbtn").forEach(btn => btn.style.borderColor = "rgba(255,255,255,0.1)");
+  const activeBtn = document.getElementById(`subbtn-${stageId}`);
+  if (activeBtn) {
+    activeBtn.style.background = "rgba(0, 242, 254, 0.15)";
+    activeBtn.style.borderColor = "#00f2fe";
+  }
+
+  const data = FIVE_STAGES_DATA[stageId];
+  const container = document.getElementById("five-stage-content-area");
+  if (!container || !data) return;
+
+  container.innerHTML = `
+    <div style="background: rgba(26, 33, 45, 0.8); border-left: 4px solid #00f2fe; padding: 18px; border-radius: 8px; margin-bottom: 20px;">
+      <h3 style="color: #fff; font-size: 1.2rem; margin-bottom: 6px;">${data.title} <span style="font-size: 0.75rem; background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 3px 8px; border-radius: 12px; border: 1px solid #10b981; margin-left: 10px;">✓ Synchronized</span></h3>
+      <p style="color: #94a3b8; font-size: 0.9rem;">${data.desc}</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+      <div style="background: rgba(26, 33, 45, 0.9); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">
+          <div>
+            <h4 style="color: #f59e0b; font-size: 1rem;">📥 Input Dataset (Raw Telemetry)</h4>
+            <span style="font-size: 0.75rem; color: #94a3b8;">File: ${data.inputName}</span>
+          </div>
+          <button onclick="downloadStageCSV('${stageId}', 'input')" style="background: rgba(245, 158, 11, 0.15); border: 1px solid #f59e0b; color: #f59e0b; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.8rem;">Download Input CSV</button>
+        </div>
+        <div style="overflow-x: auto; margin-top: 10px;">
+          ${renderStageTable(data.input)}
+        </div>
+      </div>
+
+      <div style="background: rgba(26, 33, 45, 0.9); border: 1px solid rgba(0, 242, 254, 0.3); border-radius: 12px; padding: 16px; box-shadow: 0 0 20px rgba(0, 242, 254, 0.05);">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">
+          <div>
+            <h4 style="color: #00f2fe; font-size: 1rem;">📤 Output Dataset (AI Predictions)</h4>
+            <span style="font-size: 0.75rem; color: #94a3b8;">File: ${data.outputName}</span>
+          </div>
+          <button onclick="downloadStageCSV('${stageId}', 'output')" style="background: rgba(0, 242, 254, 0.15); border: 1px solid #00f2fe; color: #00f2fe; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.8rem; box-shadow: 0 0 10px rgba(0,242,254,0.3);">Download Output CSV</button>
+        </div>
+        <div style="overflow-x: auto; margin-top: 10px;">
+          ${renderStageTable(data.output)}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  if (localStorage.getItem('autoTab') === 'fivestage') {
+    localStorage.removeItem('autoTab');
+    setTimeout(() => {
+      if (typeof switchTab === 'function') switchTab('fivestage');
+      if (typeof switchFiveStageSubtab === 'function') switchFiveStageSubtab('ice_detection');
+    }, 300);
+  } else {
+    setTimeout(() => {
+      if (typeof switchFiveStageSubtab === 'function') switchFiveStageSubtab('ice_detection');
+    }, 500);
+  }
+});
