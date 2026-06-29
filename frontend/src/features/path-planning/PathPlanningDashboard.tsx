@@ -1,27 +1,48 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Target, Route, ShieldAlert, CheckCircle2 } from 'lucide-react';
+import { fetchSafeLandingSublayer, fetchIceVolumeSublayer } from '../../utils/api';
+import type { SafeLandingRecord, IceRecord } from '../../utils/api';
 
 interface Point { x: number; y: number; }
-interface LandingZone extends Point { id: string; safe: boolean; }
-interface IceDeposit extends Point { id: string; }
-
-const LANDING_ZONES: LandingZone[] = [
-  { id: 'LZ-1', x: 20, y: 30, safe: true },
-  { id: 'LZ-2', x: 60, y: 40, safe: false }, // Hazard zone
-  { id: 'LZ-3', x: 45, y: 75, safe: true },
-];
-
-const ICE_DEPOSITS: IceDeposit[] = [
-  { id: 'ICE-A', x: 80, y: 20 },
-  { id: 'ICE-B', x: 85, y: 80 },
-];
+interface LandingZone extends Point { id: string; safe: boolean; raw: SafeLandingRecord; }
+interface IceDeposit extends Point { id: string; raw: IceRecord; }
 
 export function PathPlanningDashboard() {
+  const [landingZones, setLandingZones] = useState<LandingZone[]>([]);
+  const [iceDeposits, setIceDeposits] = useState<IceDeposit[]>([]);
   const [selectedLZ, setSelectedLZ] = useState<LandingZone | null>(null);
   const [selectedIce, setSelectedIce] = useState<IceDeposit | null>(null);
   const [isPlanning, setIsPlanning] = useState(false);
   const [pathCalculated, setPathCalculated] = useState(false);
+
+  useEffect(() => {
+    async function loadData() {
+      const lzData = await fetchSafeLandingSublayer();
+      const iceData = await fetchIceVolumeSublayer();
+
+      const mappedLz = lzData.slice(0, 8).map((record, i) => ({
+        id: record.Landing_Zone_ID || `LZ-${i+1}`,
+        x: Math.min(85, Math.max(15, (record.Longitude % 360) / 3.6)),
+        y: Math.min(85, Math.max(15, ((record.Latitude + 90) / 2) * 70 + 15)),
+        safe: record.Hazard_Score < 15,
+        raw: record
+      }));
+
+      const mappedIce = iceData.slice(0, 8).map((record, i) => ({
+        id: record.Crater_ID || `ICE-${i+1}`,
+        x: Math.min(85, Math.max(15, ((record.Longitude + 180) % 360) / 3.6)),
+        y: Math.min(85, Math.max(15, ((record.Latitude + 90) / 2) * 70 + 20)),
+        raw: record
+      }));
+
+      setLandingZones(mappedLz);
+      setIceDeposits(mappedIce);
+      if (mappedLz.length > 0) setSelectedLZ(mappedLz[0]);
+      if (mappedIce.length > 0) setSelectedIce(mappedIce[0]);
+    }
+    loadData();
+  }, []);
 
   // Simulated path generation
   const generatePath = (start: Point, end: Point) => {
@@ -100,7 +121,7 @@ export function PathPlanningDashboard() {
           </svg>
 
           {/* Landing Zones */}
-          {LANDING_ZONES.map(lz => (
+          {landingZones.map(lz => (
             <div
               key={lz.id}
               className={`absolute z-20 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center cursor-pointer group ${!lz.safe ? 'opacity-60' : ''}`}
@@ -118,7 +139,7 @@ export function PathPlanningDashboard() {
           ))}
 
           {/* Ice Deposits */}
-          {ICE_DEPOSITS.map(ice => (
+          {iceDeposits.map(ice => (
             <div
               key={ice.id}
               className="absolute z-20 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center cursor-pointer group"

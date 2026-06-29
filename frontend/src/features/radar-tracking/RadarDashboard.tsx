@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Radar, Compass, Activity, Navigation2 } from 'lucide-react';
+import { fetchPathPlanningSublayer, fetchIceVolumeSublayer } from '../../utils/api';
 
 interface Point { x: number; y: number; }
 
@@ -9,6 +10,28 @@ export function RadarDashboard() {
   const [targetIce, setTargetIce] = useState<Point>({ x: 80, y: 20 });
   const [deviation, setDeviation] = useState(0);
   const [isCorrecting, setIsCorrecting] = useState(false);
+
+  useEffect(() => {
+    async function initRadarTargets() {
+      const pathData = await fetchPathPlanningSublayer();
+      const iceData = await fetchIceVolumeSublayer();
+      if (pathData && pathData.length > 0) {
+        const start = pathData[0];
+        setRoverPos({
+          x: Math.min(85, Math.max(15, (start.Longitude % 360) / 3.6)),
+          y: Math.min(85, Math.max(15, ((start.Latitude + 90) / 2) * 70 + 15))
+        });
+      }
+      if (iceData && iceData.length > 0) {
+        const target = iceData[0];
+        setTargetIce({
+          x: Math.min(85, Math.max(15, ((target.Longitude + 180) % 360) / 3.6)),
+          y: Math.min(85, Math.max(15, ((target.Latitude + 90) / 2) * 70 + 20))
+        });
+      }
+    }
+    initRadarTargets();
+  }, []);
 
   // Simulated radar pings and auto-correction
   useEffect(() => {

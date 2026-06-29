@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppShell } from "./components/layout/AppShell";
 import { Dashboard } from "./features/mission-control/Dashboard";
+import { AllInOneDashboard } from "./features/mission-control/AllInOneDashboard";
 import { IceMappingDashboard } from "./features/ice-mapping/IceMappingDashboard";
 import { PathPlanningDashboard } from "./features/path-planning/PathPlanningDashboard";
 import { RadarDashboard } from "./features/radar-tracking/RadarDashboard";
@@ -14,8 +15,10 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<AppShell />}>
-          <Route index element={<Navigate to="/mission-control" replace />} />
-          <Route path="mission-control" element={<Dashboard />} />
+          <Route index element={<Navigate to="/all-in-one" replace />} />
+          <Route path="all-in-one" element={<AllInOneDashboard />} />
+          <Route path="mission-control" element={<AllInOneDashboard />} />
+          <Route path="gis-only" element={<Dashboard />} />
           <Route path="intelligence" element={<IceMappingDashboard />} />
           <Route path="science/ice-volume" element={<IceMappingDashboard />} />
           <Route path="planning/traverse" element={<PathPlanningDashboard />} />

@@ -1,0 +1,14 @@
+Waypoint_ID,Latitude,Longitude,Elevation,Slope,Hazard_Score,Distance_From_Start_km,Traverse_Status
+WP-PATH-01,-89.4796,94.3607,-774.4,1.32,0.0,0.0,Optimal Traverse Path
+WP-PATH-02,-89.4572,106.3374,-822.0,3.32,5.6,362.9,Optimal Traverse Path
+WP-PATH-03,-89.4347,118.3142,-869.6,5.33,11.2,725.79,Optimal Traverse Path
+WP-PATH-04,-89.4122,130.2909,-917.2,7.33,16.9,1088.69,Optimal Traverse Path
+WP-PATH-05,-89.3897,142.2677,-964.8,9.34,22.5,1451.59,Optimal Traverse Path
+WP-PATH-06,-89.3672,154.2444,-1012.3,11.34,28.1,1814.48,Optimal Traverse Path
+WP-PATH-07,-89.3447,166.2212,-1059.9,13.35,33.7,2177.38,Caution: Moderate Slopes
+WP-PATH-08,-89.3222,178.1979,-1107.5,15.35,39.3,2540.27,Caution: Moderate Slopes
+WP-PATH-09,-89.2998,190.1747,-1155.1,17.36,45.0,2903.17,Caution: Moderate Slopes
+WP-PATH-10,-89.2773,202.1515,-1202.7,19.37,50.6,3266.07,Caution: Moderate Slopes
+WP-PATH-11,-89.2548,214.1282,-1250.3,21.37,56.2,3628.96,Caution: Moderate Slopes
+WP-PATH-12,-89.2323,226.105,-1297.9,23.38,61.8,3991.86,Caution: Moderate Slopes
+WP-PATH-13,-89.2098,238.0817,-1345.5,25.38,67.4,4354.76,Caution: Moderate Slopes

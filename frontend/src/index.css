@@ -1,9 +1,109 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
+@import "tailwindcss";
 @import "leaflet/dist/leaflet.css";
 
-/* Custom theme variables and utilities */
-:root { --bg:#030712; --panel:#071024; --accent:#00D9FF; }
-body { margin:0; font-family: Inter, Arial, sans-serif; background:var(--bg); color:#F8FAFC; }
+:root {
+  --bg: #030712;
+  --panel: #071024;
+  --accent: #00D9FF;
+}
+
+@theme {
+  --color-primary-bg: #030712;
+  --color-secondary-bg: #0B1120;
+  --color-surface-bg: #111827;
+  
+  --color-accent-neon: #00D9FF;
+  --color-accent-cyan: #22D3EE;
+  --color-accent-purple: #8B5CF6;
+  
+  --color-success: #22C55E;
+  --color-warning: #F59E0B;
+  --color-alert: #EF4444;
+
+  --color-text-primary: #F8FAFC;
+  --color-text-secondary: #94A3B8;
+  --color-text-muted: #64748B;
+
+  --font-primary: 'Space Grotesk', monospace;
+  --font-secondary: 'Inter', sans-serif;
+  
+  --animate-radar-spin: radar-spin 4s linear infinite;
+  --animate-pulse-glow: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-primary-bg);
+    background-image: 
+        radial-gradient(at 10% 10%, rgba(0, 217, 255, 0.18) 0px, transparent 40%),
+        radial-gradient(at 90% 15%, rgba(139, 92, 246, 0.16) 0px, transparent 45%),
+        radial-gradient(at 50% 50%, rgba(34, 197, 94, 0.10) 0px, transparent 50%),
+        radial-gradient(at 80% 85%, rgba(236, 72, 153, 0.14) 0px, transparent 45%),
+        radial-gradient(at 15% 85%, rgba(59, 130, 246, 0.16) 0px, transparent 40%);
+    background-attachment: fixed;
+    color: var(--color-text-primary);
+    font-family: var(--font-secondary);
+    margin: 0;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-primary);
+  }
+}
+
+@layer utilities {
+  .glass-panel {
+    background: rgba(15, 23, 42, 0.52);
+    backdrop-filter: blur(32px) saturate(210%);
+    -webkit-backdrop-filter: blur(32px) saturate(210%);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 20px;
+    box-shadow: 
+        inset 0 1px 2px rgba(255, 255, 255, 0.35), 
+        inset 0 -1px 2px rgba(0, 0, 0, 0.4), 
+        0 20px 50px -10px rgba(0, 0, 0, 0.7);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .glass-panel:hover {
+    border-color: rgba(255, 255, 255, 0.35);
+    box-shadow: 
+        inset 0 1px 3px rgba(255, 255, 255, 0.5), 
+        0 25px 60px rgba(0, 217, 255, 0.22);
+  }
+
+  .glass-panel-active {
+    background: linear-gradient(135deg, rgba(0, 217, 255, 0.15) 0%, rgba(139, 92, 246, 0.12) 100%);
+    backdrop-filter: blur(32px) saturate(210%);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.5), 0 0 25px rgba(0, 217, 255, 0.3);
+    border: 1px solid rgba(0, 217, 255, 0.6);
+    border-radius: 20px;
+  }
+
+  .bg-grid-pattern {
+    background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 30px 30px;
+    background-position: -1px -1px;
+  }
+  
+  .text-glow-neon {
+    text-shadow: 0 0 15px rgba(0, 217, 255, 0.5), 0 0 30px rgba(0, 217, 255, 0.3);
+  }
+  
+  .text-glow-white {
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+  }
+}
+
+@keyframes radar-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 15px rgba(0, 217, 255, 0.2); }
+  50% { box-shadow: 0 0 25px rgba(0, 217, 255, 0.6), inset 0 0 10px rgba(0, 217, 255, 0.2); }
+}

@@ -19,7 +19,8 @@ import { cn } from "../../utils/cn";
 import { motion, AnimatePresence } from "framer-motion";
 
 const NAV_ITEMS = [
-  { label: "ISRU Command", path: "/mission-control", icon: LayoutDashboard },
+  { label: "🛰️ Spacecraft Cockpit", path: "/all-in-one", icon: LayoutDashboard },
+  { label: "GIS Map Only", path: "/gis-only", icon: Globe },
   { label: "PSRs Mapping", path: "/intelligence", icon: Globe },
   { label: "OHRC Morphology", path: "/twin", icon: Mountain },
   { label: "DFSAR Analytics", path: "/analytics/radar", icon: Radar },

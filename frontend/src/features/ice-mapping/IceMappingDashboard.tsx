@@ -1,24 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Navigation, Orbit } from 'lucide-react';
+import { fetchIceVolumeSublayer } from '../../utils/api';
+import type { IceRecord } from '../../utils/api';
 
 interface Node {
-  id: number;
+  id: number | string;
   x: number;
   y: number;
   label: string;
+  raw?: IceRecord;
 }
 
-const ICE_NODES: Node[] = [
-  { id: 1, x: 20, y: 30, label: 'Sector Alpha' },
-  { id: 2, x: 70, y: 25, label: 'Sector Beta' },
-  { id: 3, x: 40, y: 70, label: 'Sector Gamma' },
-  { id: 4, x: 80, y: 60, label: 'Sector Delta' },
-  { id: 5, x: 30, y: 50, label: 'Sector Epsilon' },
-];
-
 export function IceMappingDashboard() {
+  const [iceNodes, setIceNodes] = useState<Node[]>([]);
   const [selectedNodes, setSelectedNodes] = useState<Node[]>([]);
+
+  useEffect(() => {
+    async function loadIce() {
+      const data = await fetchIceVolumeSublayer();
+      const mapped = data.slice(0, 10).map((r, i) => ({
+        id: r.Crater_ID || i + 1,
+        x: Math.min(85, Math.max(15, ((r.Longitude + 180) % 360) / 3.6)),
+        y: Math.min(85, Math.max(15, ((r.Latitude + 90) / 2) * 70 + 15)),
+        label: r.Crater_ID || `Sector ${i + 1}`,
+        raw: r
+      }));
+      setIceNodes(mapped);
+    }
+    loadIce();
+  }, []);
 
   const handleNodeClick = (node: Node) => {
     if (selectedNodes.find(n => n.id === node.id)) {
@@ -94,7 +105,7 @@ export function IceMappingDashboard() {
           </svg>
 
           {/* Ice Nodes */}
-          {ICE_NODES.map(node => {
+          {iceNodes.map(node => {
             const isSelected = selectedNodes.find(n => n.id === node.id);
             return (
               <div

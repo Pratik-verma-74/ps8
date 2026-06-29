@@ -20,7 +20,7 @@ export function NeonButton({ children, className, variant = "primary", ...props 
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       className={cn(baseStyles, variants[variant], className)}
-      {...props}
+      {...(props as any)}
     >
       <span className="relative z-10 font-bold">{children}</span>
     </motion.button>

@@ -31,7 +31,10 @@
                 </div>
             </div>
             <nav class="nav-tabs">
-                <button class="tab-btn active" onclick="switchTab('gismap')">
+                <button class="tab-btn active" onclick="switchTab('cockpit')">
+                    <i data-lucide="cpu"></i> 🛰️ Spacecraft Cockpit
+                </button>
+                <button class="tab-btn" onclick="switchTab('gismap')">
                     <i data-lucide="globe"></i> Real Moon GIS Map (3 Layers)
                 </button>
                 <button class="tab-btn" onclick="switchTab('overview')">
@@ -44,11 +47,34 @@
                     <i data-lucide="navigation"></i> Rover Route Planner (A*)
                 </button>
             </nav>
-            <div class="status-badge">
-                <span class="status-indicator"></span>
-                <span id="telemetry-status">TELEMETRY ONLINE</span>
+            <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+                <button id="btn-fullscreen" class="export-btn glass-panel" onclick="toggleFullscreenTacticalMode()" style="cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 25px; border-color: var(--purple); background: rgba(168, 85, 247, 0.18); color: #fff; font-weight: 600; font-size: 0.88rem; transition: all 0.3s ease;">
+                    <i data-lucide="maximize" style="color: #c084fc; width: 18px; height: 18px;"></i>
+                    <span id="fullscreen-text">⛶ Fullscreen Console</span>
+                </button>
+                <button class="export-btn glass-panel" onclick="exportMissionReport()" style="cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 25px; border-color: var(--cyan); background: rgba(0, 242, 254, 0.15); color: #fff; font-weight: 600; font-size: 0.88rem; transition: all 0.3s ease;">
+                    <i data-lucide="file-text" style="color: var(--cyan); width: 18px; height: 18px;"></i>
+                    <span>📄 Export Mission Report</span>
+                </button>
+                <div class="status-badge">
+                    <span class="status-indicator"></span>
+                    <span id="telemetry-status">TELEMETRY ONLINE</span>
+                </div>
             </div>
         </header>
+
+        <!-- Live Mission HUD (Head-Up Environment Bar) -->
+        <div class="mission-hud-bar glass-panel">
+            <div class="hud-scroller">
+                <div class="hud-item"><span class="hud-icon">☀️</span> <span class="hud-label">Solar Radiation Index:</span> <strong id="hud-solar">1.36 kW/m²</strong></div>
+                <div class="hud-sep">|</div>
+                <div class="hud-item"><span class="hud-icon">📡</span> <span class="hud-label">Earth-Moon Comm Delay:</span> <strong id="hud-comm">1.28 Seconds Ping</strong></div>
+                <div class="hud-sep">|</div>
+                <div class="hud-item"><span class="hud-icon">🔋</span> <span class="hud-label">Pragyan-II Thermal Shield:</span> <strong id="hud-battery">98% (Cryogenic Stable)</strong></div>
+                <div class="hud-sep">|</div>
+                <div class="hud-item"><span class="hud-icon">🌪️</span> <span class="hud-label">Regolith Dust Density:</span> <strong id="hud-regolith">Minimal</strong></div>
+            </div>
+        </div>
 
         <!-- Stats Banner -->
         <section class="stats-banner">
@@ -57,7 +83,12 @@
                 <div class="stat-info">
                     <span class="stat-label">Total Data Points</span>
                     <h3 id="stat-total">Loading...</h3>
-                    <p class="stat-sub">OHRC + LROC + DFSAR + Diviner</p>
+                    <div class="sensor-badges-container" style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;">
+                        <span class="sensor-chip glass-tooltip" data-tooltip="OHRC: Optical High Resolution Camera for sub-meter boulder & topography imaging">OHRC <i class="info-icon">ℹ️</i></span>
+                        <span class="sensor-chip glass-tooltip" data-tooltip="LROC: Lunar Reconnaissance Orbiter Camera for high-res surface mapping">LROC <i class="info-icon">ℹ️</i></span>
+                        <span class="sensor-chip glass-tooltip" data-tooltip="DFSAR: Dual-Frequency Synthetic Aperture Radar for subsurface ice dielectric probing">DFSAR <i class="info-icon">ℹ️</i></span>
+                        <span class="sensor-chip glass-tooltip" data-tooltip="Diviner: Lunar Radiometer Experiment for cryogenic shadow thermal mapping">Diviner <i class="info-icon">ℹ️</i></span>
+                    </div>
                 </div>
             </div>
             <div class="stat-card glass-panel">
@@ -86,15 +117,177 @@
             </div>
         </section>
 
+        <!-- TAB 0: SKEUOMORPHIC COCKPIT COMMAND -->
+        <main id="tab-cockpit" class="tab-content active">
+            <div class="skeuo-cockpit-frame">
+                <!-- Hardware Rivets -->
+                <div class="rivet top-l"><div class="rivet-slot"></div></div>
+                <div class="rivet top-r"><div class="rivet-slot"></div></div>
+                <div class="rivet bot-l"><div class="rivet-slot"></div></div>
+                <div class="rivet bot-r"><div class="rivet-slot"></div></div>
+
+                <!-- Cockpit Title & Switches Bay -->
+                <div class="skeuo-header">
+                    <div class="skeuo-title">
+                        <div class="skeuo-compass-icon"><i data-lucide="compass" class="icon-spin"></i></div>
+                        <div>
+                            <span class="skeuo-tag">⚡ ISRO CHANDRAYAAN-4 COCKPIT</span>
+                            <h2>PRAGYAN-II TACTICAL COMMAND CONSOLE</h2>
+                        </div>
+                    </div>
+                    <div class="skeuo-switches-bay">
+                        <div class="skeuo-switch-item" onclick="toggleSkeuoSwitch('pwr')">
+                            <span>MAIN PWR</span>
+                            <div id="led-pwr" class="skeuo-led led-green active"></div>
+                            <div class="skeuo-switch-body"><div id="sw-pwr" class="skeuo-toggle active"></div></div>
+                        </div>
+                        <div class="skeuo-switch-item" onclick="toggleSkeuoSwitch('rdr')">
+                            <span>DFSAR RADAR</span>
+                            <div id="led-rdr" class="skeuo-led led-cyan active"></div>
+                            <div class="skeuo-switch-body"><div id="sw-rdr" class="skeuo-toggle active"></div></div>
+                        </div>
+                        <div class="skeuo-switch-item" onclick="toggleSkeuoSwitch('com')">
+                            <span>EARTH LINK</span>
+                            <div id="led-com" class="skeuo-led led-amber active"></div>
+                            <div class="skeuo-switch-body"><div id="sw-com" class="skeuo-toggle active"></div></div>
+                        </div>
+                        <div class="skeuo-switch-item" onclick="toggleSkeuoSwitch('htr')">
+                            <span>CRYO HEATERS</span>
+                            <div id="led-htr" class="skeuo-led led-red"></div>
+                            <div class="skeuo-switch-body"><div id="sw-htr" class="skeuo-toggle"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3-Column Cockpit Instrumentation Grid -->
+                <div class="skeuo-grid">
+                    <!-- Bay 1: Analog Gauges -->
+                    <div class="skeuo-box">
+                        <div class="skeuo-box-title"><span>⚡ Power & Storage Gauges</span><span class="txt-green">NOMINAL</span></div>
+                        <div class="skeuo-dials">
+                            <div class="skeuo-dial-wrapper">
+                                <div class="skeuo-dial dial-battery">
+                                    <div class="skeuo-dial-inner">
+                                        <span class="dial-val txt-green">98%</span>
+                                        <span class="dial-lbl">BATTERY</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="skeuo-dial-wrapper">
+                                <div class="skeuo-dial dial-solar">
+                                    <div class="skeuo-dial-inner">
+                                        <span class="dial-val txt-amber">94%</span>
+                                        <span class="dial-lbl">SOLAR ARR</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="skeuo-box-title" style="margin-top: 15px;"><span>❄️ Cryogenic Thermal Bay</span><span class="txt-cyan">STABLE</span></div>
+                        <div class="skeuo-thermal-display">
+                            <div>
+                                <span class="dial-lbl">EXTERNAL SURFACE TEMP</span>
+                                <div class="thermal-val txt-cyan">-134.7 °C</div>
+                                <span class="dial-lbl" style="font-size: 0.65rem;">PSR SHADOW EQUILIBRIUM</span>
+                            </div>
+                            <div class="thermal-bars">
+                                <span style="height: 40%"></span><span style="height: 60%"></span><span style="height: 80%"></span><span style="height: 50%"></span><span style="height: 90%"></span><span style="height: 70%"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bay 2: CRT Radar Scope -->
+                    <div class="skeuo-box" style="align-items: center; justify-content: center;">
+                        <div class="skeuo-box-title" style="width: 100%;"><span>🛰️ DFSAR L/S-Band Radar Scope</span><span class="txt-green icon-pulse">SWEEPING</span></div>
+                        <div class="skeuo-crt-monitor">
+                            <div class="crt-grid-ring r1"></div>
+                            <div class="crt-grid-ring r2"></div>
+                            <div class="crt-grid-ring r3"></div>
+                            <div class="crt-crosshair-h"></div>
+                            <div class="crt-crosshair-v"></div>
+                            <div class="crt-sweep-beam"></div>
+                            <div class="crt-blip blip-1"></div>
+                            <div class="crt-blip blip-2"></div>
+                            <div class="crt-rover-tag">ROVER [0,0]</div>
+                        </div>
+                        <div class="crt-stats-row">
+                            <div class="crt-stat-box"><span class="dial-lbl">ICE TARGET DIST</span><strong class="txt-green">42.8 Meters</strong></div>
+                            <div class="crt-stat-box"><span class="dial-lbl">DIELECTRIC CPR</span><strong class="txt-cyan">1.68 (HIGH)</strong></div>
+                        </div>
+                    </div>
+
+                    <!-- Bay 3: Segmented Readouts -->
+                    <div class="skeuo-box">
+                        <div class="skeuo-box-title"><span>📊 ISRU Intelligence Readout</span><span class="txt-amber">6-BACKBONE</span></div>
+                        <div class="skeuo-led-readouts">
+                            <div class="skeuo-led-box">
+                                <div>
+                                    <span class="dial-lbl">TOTAL TELEMETRY SOUNDINGS</span>
+                                    <div class="led-val text-white">5,000</div>
+                                </div>
+                                <i data-lucide="database" class="txt-muted"></i>
+                            </div>
+                            <div class="skeuo-led-box">
+                                <div>
+                                    <span class="dial-lbl">HIGH PROBABILITY ICE ZONES</span>
+                                    <div class="led-val txt-cyan">526 Craters</div>
+                                </div>
+                                <i data-lucide="activity" class="txt-cyan"></i>
+                            </div>
+                            <div class="skeuo-led-box">
+                                <div>
+                                    <span class="dial-lbl">SAFE LANDING SITES (&lt; 12°)</span>
+                                    <div class="led-val txt-green">1,501 Zones</div>
+                                </div>
+                                <i data-lucide="shield-check" class="txt-green"></i>
+                            </div>
+                        </div>
+                        <button class="skeuo-push-btn" onclick="alert('Transmitting full Pragyan-II mission summary to ISRO Deep Space Network...')">
+                            📡 TRANSMIT SUMMARY TO ISRO HQ
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Dot Matrix Log Printer Feed -->
+                <div class="skeuo-printer-feed">
+                    <div class="skeuo-box-title" style="margin-bottom: 8px;"><span class="txt-green"><i data-lucide="terminal" style="width: 14px; height: 14px; vertical-align: middle;"></i> Pragyan-II Live Hardware Datastream (Dot Matrix Feed)</span></div>
+                    <div id="skeuo-logs" class="printer-logs custom-scrollbar">
+                        <div><span class="txt-cyan">&gt;</span> SYS_BOOT: Pragyan-II Hardware Diagnostics Nominal.</div>
+                        <div><span class="txt-cyan">&gt;</span> DFSAR: L/S-Band Radar locked onto Faustini Crater Sector 4.</div>
+                        <div><span class="txt-cyan">&gt;</span> OHRC: High-resolution DEM alignment confirmed (&lt;0.1m error).</div>
+                        <div><span class="txt-cyan">&gt;</span> COMMS: Telemetry stream active with ISRO Deep Space Network.</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
         <!-- TAB 1: REAL GIS MOON MAP (GOOGLE MAPS STYLE) -->
-        <main id="tab-gismap" class="tab-content active">
+        <main id="tab-gismap" class="tab-content">
             <div class="section-header">
                 <h2>🛰️ Live Lunar South Pole GIS Telemetry Console</h2>
-                <p>Real-time rendering of fused ISRO OHRC / NASA LROC satellite telemetry. Toggle multi-modal AI prediction overlays below.</p>
+                <p>Real-time rendering of fused ISRO / NASA satellite telemetry. Hover over sensor badges above for specifications.</p>
             </div>
 
             <div class="gis-layout glass-panel">
                 <div class="gis-sidebar">
+                    <!-- Radar Scanner / Orbital Live Feed Mini-Widget -->
+                    <div class="orbital-radar-widget glass-panel">
+                        <div class="radar-circle">
+                            <div class="radar-sweep"></div>
+                            <div class="radar-grid"></div>
+                            <span class="radar-dot dot-1"></span>
+                            <span class="radar-dot dot-2"></span>
+                            <span class="radar-center"></span>
+                        </div>
+                        <div class="radar-info">
+                            <div class="radar-status-line">
+                                <span class="status-indicator live-pulse"></span>
+                                <strong class="text-cyan">ORBITER LIVE STREAM</strong>
+                            </div>
+                            <span class="radar-subtext">Chandrayaan-2 DFSAR Probing</span>
+                            <span class="radar-freq">Freq: 2.5 GHz L/S-Band</span>
+                        </div>
+                    </div>
+
                     <h3><i data-lucide="layers"></i> Map Layer Controls</h3>
                     <p class="text-muted text-sm mb-3">Toggle telemetry overlays directly on the real lunar surface.</p>
                     
@@ -116,6 +309,32 @@
                         <input type="checkbox" checked id="chk-ice" onclick="event.stopPropagation(); toggleLayer('ice');">
                     </div>
 
+                    <!-- Ice Volume & Drag and Drop Density Box -->
+                    <div class="ice-volume-container" id="ice-volume-box">
+                        <div class="volume-header">
+                            <span class="vol-icon">📊</span>
+                            <span class="vol-title">Estimated Ice Volume Analysis</span>
+                        </div>
+                        <div class="volume-metrics">
+                            <div class="vol-metric-item">
+                                <span class="lbl">Total Volume:</span>
+                                <span class="val text-cyan">4.82 × 10⁶ m³</span>
+                            </div>
+                            <div class="vol-metric-item">
+                                <span class="lbl">Avg Density:</span>
+                                <span class="val text-emerald">0.92 g/cm³</span>
+                            </div>
+                        </div>
+                        <div class="drop-zone" id="csv-drop-zone" onclick="document.getElementById('csv-file-input').click()">
+                            <input type="file" id="csv-file-input" accept=".csv" style="display: none;" onchange="handleCsvUpload(event)">
+                            <div class="drop-zone-content" id="drop-zone-text">
+                                <i data-lucide="upload-cloud" class="upload-icon"></i>
+                                <span><strong>Drag & Drop CSV</strong> or click to calculate ice density</span>
+                            </div>
+                        </div>
+                        <div class="density-result" id="density-result" style="display: none;"></div>
+                    </div>
+
                     <div class="layer-item layer-landing" id="btn-layer-landing" onclick="toggleLayer('landing')">
                         <div class="layer-icon"><i data-lucide="target"></i></div>
                         <div class="layer-text">
@@ -125,6 +344,32 @@
                         <input type="checkbox" id="chk-landing" onclick="event.stopPropagation(); toggleLayer('landing');">
                     </div>
 
+                    <!-- Safe Landing & Drag and Drop Hazard Box -->
+                    <div class="ice-volume-container landing-box" id="landing-analysis-box">
+                        <div class="volume-header" style="color: var(--emerald);">
+                            <span class="vol-icon">🛡️</span>
+                            <span class="vol-title">Landing Site Safety Assessment</span>
+                        </div>
+                        <div class="volume-metrics">
+                            <div class="vol-metric-item">
+                                <span class="lbl">Safe Touchdowns:</span>
+                                <span class="val text-emerald">1,501 Sites</span>
+                            </div>
+                            <div class="vol-metric-item">
+                                <span class="lbl">Max Terrain Slope:</span>
+                                <span class="val" style="color: #6EE7B7;">&lt; 8.4° (Optimal)</span>
+                            </div>
+                        </div>
+                        <div class="drop-zone landing-drop" id="landing-drop-zone" onclick="document.getElementById('landing-csv-input').click()">
+                            <input type="file" id="landing-csv-input" accept=".csv" style="display: none;" onchange="handleLandingCsvUpload(event)">
+                            <div class="drop-zone-content" id="landing-drop-text">
+                                <i data-lucide="upload-cloud" class="upload-icon" style="color: var(--emerald);"></i>
+                                <span><strong>Drag & Drop DEM CSV</strong> or click to calculate hazard score</span>
+                            </div>
+                        </div>
+                        <div class="density-result" id="landing-result" style="display: none;"></div>
+                    </div>
+
                     <div class="layer-item layer-route" id="btn-layer-route" onclick="toggleLayer('route')">
                         <div class="layer-icon"><i data-lucide="navigation-2"></i></div>
                         <div class="layer-text">
@@ -132,6 +377,12 @@
                             <span>A* Safest Path to Ice Deposits</span>
                         </div>
                         <input type="checkbox" id="chk-route" onclick="event.stopPropagation(); toggleLayer('route');">
+                    </div>
+
+                    <div class="emergency-alert-box glass-panel" style="margin-top: 15px; padding: 12px; border-color: #ef4444; background: rgba(239, 68, 68, 0.12); border-radius: 12px;">
+                        <button class="btn-glow w-full" onclick="triggerEmergencyAlert()" style="background: linear-gradient(135deg, #ef4444, #b91c1c); box-shadow: 0 0 15px rgba(239, 68, 68, 0.5); font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                            <span>🚨 Trigger Emergency Reroute</span>
+                        </button>
                     </div>
 
                     <div class="map-legend mt-auto">
@@ -150,8 +401,9 @@
                         <div class="stat-badge"><span class="stat-label">🎯 Safe Touchdown</span><span class="stat-val landing-val" id="hud-landing">Loading...</span></div>
                         <div class="stat-badge"><span class="stat-label">⚡ AI Confidence</span><span class="stat-val ai-val" id="hud-confidence">Loading...</span></div>
                     </div>
-                    <div class="map-overlay-info">
-                        <span><i data-lucide="crosshair"></i> South Pole Exploration Sector (Lat -88.0° to -89.9°)</span>
+                    <div class="map-overlay-info" style="display: flex; justify-content: space-between; width: 100%; align-items: center; padding: 8px 16px; background: rgba(15, 23, 42, 0.85);">
+                        <span><i data-lucide="crosshair"></i> South Pole Exploration Sector</span>
+                        <span id="live-coords-tracker" style="font-family: monospace; font-weight: 700; color: var(--cyan); background: rgba(0,0,0,0.6); padding: 4px 10px; border-radius: 12px; border: 1px solid var(--cyan);">📡 CURSOR: LAT -89.1500° | LON 141.2000° | ALT -2350m</span>
                     </div>
                 </div>
             </div>

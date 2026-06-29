@@ -1,18 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Cpu, BatteryCharging, Thermometer, AlertTriangle, Zap } from 'lucide-react';
+import { fetchMissionStats } from '../../utils/api';
 
 export function SimulationDashboard() {
-  const [battery, setBattery] = useState(85);
-  const [temp, setTemp] = useState(-20);
-  const [solarEff, setSolarEff] = useState(92);
+  const [battery, setBattery] = useState(98.0);
+  const [temp, setTemp] = useState(-134.7);
+  const [solarEff, setSolarEff] = useState(94.2);
 
   useEffect(() => {
+    async function loadRealStats() {
+      const stats = await fetchMissionStats();
+      if (stats.avg_temperature) {
+        // Convert Kelvin to Celsius if reported in Kelvin (>100)
+        const t = stats.avg_temperature > 100 ? stats.avg_temperature - 273.15 : stats.avg_temperature;
+        setTemp(Number(t.toFixed(1)));
+      }
+    }
+    loadRealStats();
+
     const interval = setInterval(() => {
-      // Simulate slight fluctuations in metrics
-      setBattery(prev => Math.max(0, prev - (Math.random() * 0.5)));
-      setTemp(prev => prev + (Math.random() * 2 - 1));
-      setSolarEff(prev => Math.min(100, Math.max(0, prev + (Math.random() * 4 - 2))));
+      // Simulate slight fluctuations in metrics around nominal setpoints
+      setBattery(prev => Math.max(0, prev - (Math.random() * 0.1)));
+      setTemp(prev => prev + (Math.random() * 0.4 - 0.2));
+      setSolarEff(prev => Math.min(100, Math.max(0, prev + (Math.random() * 1.0 - 0.5))));
     }, 2000);
     return () => clearInterval(interval);
   }, []);
